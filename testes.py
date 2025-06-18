@@ -181,28 +181,19 @@ class TestStringMethods(unittest.TestCase):
 
     #GET by ID
     def teste_017_GETbyID_pedidos(self):
-        #cria um aluno 'mario', com id 20
-        r = requests.post('http://localhost:5000/alunos',
-            json={
-            "id": 20,
-            "nome": "mario",
-            "idade": 0,
-            "data_nascimento": "2004-08-29",
-            "nota_primeiro_semestre": 0,
-            "nota_segundo_semestre": 0,
-            "turma_id": 0
-        })
+        #cria um item com SKU: 999999999
+        r = requests.post('http://127.0.0.1:5000/itens',json={"SKU": "999999999","nome": "Teste", "valor": 12000, "marca": "Bajaj"})
+        self.assertEqual(r.status_code,200)
 
-        #consulta a url /alunos/20, pra ver se o aluno está lá
-        resposta = requests.get('http://localhost:5000/alunos/20')
+        #consulta a url /itens/999999999
+        resposta = requests.get('http://localhost:5000/itens/999999999')
         dict_retornado = resposta.json() #pego o dicionario retornado
-        #print(type(dict_retornado))
+        
+        #verifica se foi retornado o tipo correto
         self.assertEqual(type(dict_retornado), dict)
-        self.assertIn('nome',dict_retornado)#o dicionario dict_retornado, que veio do servidor, 
-        #tem que ter a chave nome
-        self.assertEqual(dict_retornado['nome'],'mario') # no dic, o nome tem que ser o 
-                                                   # que eu mandei
-                                                   # tem que ser mario
+        self.assertIn('nome',dict_retornado)#o dicionario dict_retornado, que veio do servidor, tem que ter a chave nome
+        self.assertEqual(dict_retornado['nome'],'Teste') 
+        # no dic, o nome tem que ser o criado
 
 
     def teste_018_GETbyID_pedidos(self):

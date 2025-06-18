@@ -23,7 +23,7 @@ def get_itens_by_SKU(SKU_item):
     for item in dados_itens:
         if item["SKU"] == SKU_item:
             return jsonify(item)
-        return jsonify("Erro: Item não encontrado")
+    return jsonify("Erro: Item não encontrado")
 
 @app.route('/itens', methods=['POST'])
 def post_item():
@@ -71,7 +71,7 @@ def get_clientes_by_telefone(telefone):
     for cliente in dados_clientes:
         if cliente["telefone"] == telefone:
             return jsonify(cliente)
-        return jsonify("Erro: Cliente não encontrado")
+    return jsonify("Erro: Cliente não encontrado")
 
 @app.route('/clientes', methods=['POST'])
 def post_cliente():
@@ -116,7 +116,7 @@ def get_itens_pedido_by_id(id_item_pedido):
     for itensPedido in dados_itensPedido:
         if itensPedido["id"] == id_item_pedido:
             return jsonify(itensPedido)
-        return jsonify("Erro: Item do pedido não encontrado")
+    return jsonify("Erro: Item do pedido não encontrado")
 
 @app.route('/itensPedido', methods=['POST'])
 def post_item_pedido():
@@ -164,7 +164,7 @@ def get_pedido_by_id(id_pedido):
     for Pedido in dados_Pedido:
         if Pedido["id"] == id_pedido:
             return jsonify(Pedido)
-        return jsonify("Erro: Pedido não encontrado")
+    return jsonify("Erro: Pedido não encontrado")
 
 @app.route('/pedidos', methods=['POST'])
 def post_pedido():
