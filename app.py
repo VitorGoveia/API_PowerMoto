@@ -16,6 +16,15 @@ def get_itens():
     dados_itens = dici["Itens"]
     return jsonify(dados_itens)
 
+@app.route('/itens/<string:SKU_item>', methods=['GET'])
+def get_itens_by_SKU(SKU_item):
+    """Retorna o item com a SKU no endpoint, caso ele exista"""
+    dados_itens = dici["Itens"]
+    for item in dados_itens:
+        if item["SKU"] == SKU_item:
+            return jsonify(item)
+        return jsonify("Erro: Item não encontrado")
+
 @app.route('/itens', methods=['POST'])
 def post_item():
     """Cadastra um item"""
@@ -55,6 +64,15 @@ def get_clientes():
     dados_clientes = dici["Clientes"]
     return jsonify(dados_clientes)
 
+@app.route('/clientes/<string:telefone>', methods=['GET'])
+def get_clientes_by_telefone(telefone):
+    """Retorna o item com o telefone no endpoint, caso ele exista"""
+    dados_clientes = dici["Clientes"]
+    for cliente in dados_clientes:
+        if cliente["telefone"] == telefone:
+            return jsonify(cliente)
+        return jsonify("Erro: Cliente não encontrado")
+
 @app.route('/clientes', methods=['POST'])
 def post_cliente():
     """Cadastra um cliente"""
@@ -90,6 +108,15 @@ def get_itens_pedido():
     """Retorna todos os itens de pedido cadastrados"""
     dados_itens_pedido = dici["Itens_Pedido"]
     return jsonify(dados_itens_pedido)
+
+@app.route('/itensPedido/<int:id_item_pedido>', methods=['GET'])
+def get_itens_pedido_by_id(id_item_pedido):
+    """Retorna o item com o id do item do pedido no endpoint, caso ele exista"""
+    dados_itensPedido = dici["Itens_Pedido"]
+    for itensPedido in dados_itensPedido:
+        if itensPedido["id"] == id_item_pedido:
+            return jsonify(itensPedido)
+        return jsonify("Erro: Item do pedido não encontrado")
 
 @app.route('/itensPedido', methods=['POST'])
 def post_item_pedido():
@@ -129,6 +156,15 @@ def get_pedidos():
     """Retorna todos os pedidos cadastrados"""
     dados_pedidos = dici["Pedidos"]
     return jsonify(dados_pedidos)
+
+@app.route('/pedidos/<int:id_pedido>', methods=['GET'])
+def get_pedido_by_id(id_pedido):
+    """Retorna o pedido com o id no endpoint, caso ele exista"""
+    dados_Pedido = dici["Pedidos"]
+    for Pedido in dados_Pedido:
+        if Pedido["id"] == id_pedido:
+            return jsonify(Pedido)
+        return jsonify("Erro: Pedido não encontrado")
 
 @app.route('/pedidos', methods=['POST'])
 def post_pedido():

@@ -3,6 +3,7 @@ import unittest
 
 class TestStringMethods(unittest.TestCase):
     # TESTES GET     
+
     def teste_001_GET_itens(self):
         #pega a url /itens, com o verbo get
         r = requests.get('http://127.0.0.1:5000/itens')
@@ -12,11 +13,9 @@ class TestStringMethods(unittest.TestCase):
 
         try:
             obj_retornado = r.json()
-            #r.json() faz o requests pegar o arquivo e transformar em lista ou dicionario.
         except:
             self.fail("queria um json mas voce retornou outra coisa")
 
-        #Tem que retornar a lista dos itens
         self.assertEqual(type(obj_retornado),type([]))
 
     def teste_002_GET_clientes(self):
@@ -182,7 +181,30 @@ class TestStringMethods(unittest.TestCase):
 
     #GET by ID
     def teste_017_GETbyID_pedidos(self):
-        pass
+        #cria um aluno 'mario', com id 20
+        r = requests.post('http://localhost:5000/alunos',
+            json={
+            "id": 20,
+            "nome": "mario",
+            "idade": 0,
+            "data_nascimento": "2004-08-29",
+            "nota_primeiro_semestre": 0,
+            "nota_segundo_semestre": 0,
+            "turma_id": 0
+        })
+
+        #consulta a url /alunos/20, pra ver se o aluno está lá
+        resposta = requests.get('http://localhost:5000/alunos/20')
+        dict_retornado = resposta.json() #pego o dicionario retornado
+        #print(type(dict_retornado))
+        self.assertEqual(type(dict_retornado), dict)
+        self.assertIn('nome',dict_retornado)#o dicionario dict_retornado, que veio do servidor, 
+        #tem que ter a chave nome
+        self.assertEqual(dict_retornado['nome'],'mario') # no dic, o nome tem que ser o 
+                                                   # que eu mandei
+                                                   # tem que ser mario
+
+
     def teste_018_GETbyID_pedidos(self):
         pass
     def teste_019_GETbyID_pedidos(self):
