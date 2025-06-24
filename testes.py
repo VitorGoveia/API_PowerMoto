@@ -2,8 +2,8 @@ import requests
 import unittest
 
 class TestStringMethods(unittest.TestCase):
+    
     # TESTES GET     
-
     def teste_001_GET_itens(self):
         #pega a url /itens, com o verbo get
         r = requests.get('http://127.0.0.1:5000/itens')
@@ -167,20 +167,116 @@ class TestStringMethods(unittest.TestCase):
         pass
 
     #DELETE
-    def teste_013_DELETE_pedidos(self):
-        pass
+    def teste_013_DELETE_itens(self):
+        #cria um item com SKU: apagado
+        r = requests.post('http://127.0.0.1:5000/itens',json={"SKU": "apagado","nome": "Teste", "valor": 12000, "marca": "Bajaj"})
+        self.assertEqual(r.status_code,200)
+        #cria um item com SKU: continua
+        r = requests.post('http://127.0.0.1:5000/itens',json={"SKU": "continua","nome": "Teste", "valor": 12000, "marca": "Bajaj"})
+        self.assertEqual(r.status_code,200)
 
-    def teste_014_DELETE_pedidos(self):
-        pass
+        #Cria variaveis para verificar se os itens foram apagados mesmo
+        achei_apagado = False
+        achei_continua = False
 
-    def teste_015_DELETE_pedidos(self):
-        pass
+        requests.delete('http://127.0.0.1:5000/itens/apagado')
+    
+        itens = requests.get('http://127.0.0.1:5000/itens')
+        lista_itens = itens.json()
+
+        #Verifica se aparecem na lista de itens
+        for item in lista_itens:
+            if "apagado" == item["SKU"]:
+                achei_apagado = True
+            if "continua" == item["SKU"]:
+                achei_continua = True
+
+        #Verifica se a lógica está correta e se o item apagado realmente foi apagado
+        if not achei_continua:
+            self.fail('item com SKU: continua, nao apareceu na lista de itens')
+        if achei_apagado:
+            self.fail('item com SKU: apagado, permanece na lista de itens')
+
+    def teste_014_DELETE_clientes(self):
+        r = requests.post('http://127.0.0.1:5000/clientes',json={"telefone": "apagado", "nome": "apagado"})
+        self.assertEqual(r.status_code,200)
+
+        r = requests.post('http://127.0.0.1:5000/clientes',json={"telefone": "continua", "nome": "continua"})
+        self.assertEqual(r.status_code,200)
+
+        achei_apagado = False
+        achei_continua = False
+
+        requests.delete('http://127.0.0.1:5000/clientes/apagado')
+    
+        clientes = requests.get('http://127.0.0.1:5000/clientes')
+        lista_clientes = clientes.json()
+
+        for item in lista_clientes:
+            if "apagado" == item["telefone"]:
+                achei_apagado = True
+            if "continua" == item["telefone"]:
+                achei_continua = True
+
+        if not achei_continua:
+            self.fail('cliente com telefone: continua, nao apareceu na lista de clientes')
+        if achei_apagado:
+            self.fail('cliente com telefone: apagado, permanece na lista de clientes')
+
+    def teste_015_DELETE_itensPedido(self):
+        r = requests.post('http://127.0.0.1:5000/itensPedido',json={"id": 1999999999, "SKU_item": "V1", "quantidade": 1, "prazo": 0})
+        self.assertEqual(r.status_code,200)
+
+        r = requests.post('http://127.0.0.1:5000/itensPedido',json={"id": 2999999999, "SKU_item": "V2", "quantidade": 2, "prazo": 7})
+        self.assertEqual(r.status_code,200)
+
+        achei_apagado = False
+        achei_continua = False
+
+        requests.delete('http://127.0.0.1:5000/itensPedido/1999999999')
+    
+        Item_pedido = requests.get('http://127.0.0.1:5000/itensPedido')
+        lista_itens_pedido = Item_pedido.json()
+
+        for item_pedido in lista_itens_pedido:
+            if 1999999999 == item_pedido["id"]:
+                achei_apagado = True
+            if 2999999999 == item_pedido["id"]:
+                achei_continua = True
+
+        if not achei_continua:
+            self.fail('item do pedido com id: 2999999999, nao apareceu na lista de itens do pedido')
+        if achei_apagado:
+            self.fail('item do pedido com id: 1999999999, permanece na lista de itens do pedido')
 
     def teste_016_DELETE_pedidos(self):
-        pass
+        r = requests.post('http://127.0.0.1:5000/pedidos',json={"id": 1999999999, "telefone_cliente": "1234", "id_item_pedido": 2999999999})
+        self.assertEqual(r.status_code,200)
+
+        r = requests.post('http://127.0.0.1:5000/pedidos',json={"id": 2999999999, "telefone_cliente": "5678", "id_item_pedido": 2999999999})
+        self.assertEqual(r.status_code,200)
+        
+        achei_apagado = False
+        achei_continua = False
+
+        requests.delete('http://127.0.0.1:5000/pedidos/1999999999')
+    
+        get_pedido = requests.get('http://127.0.0.1:5000/pedidos')
+        lista_pedidos = get_pedido.json()
+
+        for pedido in lista_pedidos:
+            if 1999999999 == pedido["id"]:
+                achei_apagado = True
+            if 2999999999 == pedido["id"]:
+                achei_continua = True
+
+        if not achei_continua:
+            self.fail('pedido com id: 2999999999, nao apareceu na lista de pedidos')
+        if achei_apagado:
+            self.fail('pedido com id: 1999999999, permanece na lista de pedidos')
 
     #GET by ID
-    def teste_017_GETbyID_pedidos(self):
+    def teste_017_GETbyID_itens(self):
         #cria um item com SKU: 999999999
         r = requests.post('http://127.0.0.1:5000/itens',json={"SKU": "999999999","nome": "Teste", "valor": 12000, "marca": "Bajaj"})
         self.assertEqual(r.status_code,200)
@@ -195,13 +291,38 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(dict_retornado['nome'],'Teste') 
         # no dic, o nome tem que ser o criado
 
+    def teste_018_GETbyID_clientes(self):
+        r = requests.post('http://127.0.0.1:5000/clientes',json={"telefone": "999999999", "nome": "Vitor"})
+        self.assertEqual(r.status_code,200)
 
-    def teste_018_GETbyID_pedidos(self):
-        pass
-    def teste_019_GETbyID_pedidos(self):
-        pass
+        resposta = requests.get('http://localhost:5000/clientes/999999999')
+        dict_retornado = resposta.json()
+        
+        self.assertEqual(type(dict_retornado), dict)
+        self.assertIn('nome',dict_retornado)
+        self.assertEqual(dict_retornado['nome'],'Vitor') 
+
+    def teste_019_GETbyID_itensPedido(self):
+        r = requests.post('http://127.0.0.1:5000/itensPedido',json={"id": 999999999, "SKU_item": "999999999", "quantidade": 1, "prazo": 0})
+        self.assertEqual(r.status_code,200)
+
+        resposta = requests.get('http://localhost:5000/itensPedido/999999999')
+        dict_retornado = resposta.json()
+        
+        self.assertEqual(type(dict_retornado), dict)
+        self.assertIn('SKU_item',dict_retornado)
+        self.assertEqual(dict_retornado['SKU_item'],'999999999') 
+
     def teste_020_GETbyID_pedidos(self):
-        pass
+        r = requests.post('http://127.0.0.1:5000/pedidos',json={"id": 999999999, "telefone_cliente": "999999999", "id_item_pedido": 999999999})
+        self.assertEqual(r.status_code,200)
+
+        resposta = requests.get('http://localhost:5000/pedidos/999999999')
+        dict_retornado = resposta.json()
+        
+        self.assertEqual(type(dict_retornado), dict)
+        self.assertIn('telefone_cliente',dict_retornado)
+        self.assertEqual(dict_retornado['telefone_cliente'],'999999999') 
 
 def runTests():
         suite = unittest.defaultTestLoader.loadTestsFromTestCase(TestStringMethods)

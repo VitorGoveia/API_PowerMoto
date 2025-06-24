@@ -52,9 +52,8 @@ def deletar_item(sku_item):
     itens = dici["Itens"]
     for item in itens:
         if item["SKU"] == sku_item:
-            item_deletado = request.json
             itens.remove(item)
-            return jsonify(item_deletado)
+            return jsonify(item)
     return jsonify("Item não encontrado")
     
 #CLIENTES:
@@ -97,9 +96,8 @@ def delete_clientes(numero_cliente):
     clientes = dici["Clientes"]
     for cliente in clientes:
         if cliente["telefone"] == numero_cliente:
-            cliente_deletado = request.json
             clientes.remove(cliente)
-            return jsonify(cliente_deletado)
+            return jsonify(cliente)
     return jsonify('Cliente não encontrado')
     
 #ITENS PEDIDO:
@@ -144,10 +142,9 @@ def delete_item_pedido(id_item_pedido):
     """Deleta item do pedido cadastrado"""
     itens_pedido = dici["Itens_Pedido"]
     for item_pedido in itens_pedido:
-        if itens_pedido["id"] == id_item_pedido:
-            item_pedido_deletado = request.json
+        if item_pedido["id"] == id_item_pedido:
             itens_pedido.remove(item_pedido)
-            return jsonify(item_pedido_deletado)
+            return jsonify(item_pedido)
     return jsonify("Item do pedido não encontrado")
 
 #ORÇAMENTOS:
@@ -191,9 +188,8 @@ def deletar_pedido(id_pedido):
     pedidos = dici["Pedidos"]
     for pedido in pedidos:
         if pedido["id"] == id_pedido:
-            pedido_deletado = request.json
             pedidos.remove(pedido)
-            return jsonify(pedido_deletado)
+            return jsonify(pedido)
     return jsonify("Pedido não encontrado")
 
 if __name__ == '__main__':
