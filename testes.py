@@ -154,18 +154,96 @@ class TestStringMethods(unittest.TestCase):
             self.fail('pedido id: 2000, nao apareceu na lista de pedidos')
 
     #PUT
-    def teste_009_PUT_pedidos(self):
-        pass
+    def teste_009_PUT_item(self):
+        item_antes = requests.get('http://127.0.0.1:5000/itens/V1')
+        self.assertEqual(item_antes.status_code,200)
 
-    def teste_010_PUT_pedidos(self):
-        pass
+        r = requests.put('http://127.0.0.1:5000/itens/V1', json={
+            "nome": "Avião de combate",
+            "valor": 9999999,
+            "marca": "TRIUMPH"
+        })
+        self.assertEqual(r.status_code, 200)
 
-    def teste_011_PUT_pedidos(self):
-        pass
+        item_alterado = requests.get('http://127.0.0.1:5000/itens/V1')
+        self.assertEqual(item_alterado.status_code,200)
+
+        item_alterado_j = item_alterado.json()
+        item_antes_j = item_antes.json()
+
+        if item_antes_j["SKU"] != item_alterado_j["SKU"]:
+            self.fail("Mudou o item errado")
+        
+        if item_antes_j["nome"] == item_alterado_j["nome"]:
+            self.fail("As informações não foram alteradas")
+
+    def teste_010_PUT_clientes(self):
+        cliente_antes = requests.get('http://127.0.0.1:5000/clientes/1234')
+        self.assertEqual(cliente_antes.status_code,200)
+
+        r = requests.put('http://127.0.0.1:5000/clientes/1234', json={
+            "nome": "Cliente Vitor"
+        })
+        self.assertEqual(r.status_code, 200)
+
+        cliente_alterado = requests.get('http://127.0.0.1:5000/clientes/1234')
+        self.assertEqual(cliente_alterado.status_code,200)
+
+        cliente_alterado_j = cliente_alterado.json()
+        cliente_antes_j = cliente_antes.json()
+
+        if cliente_antes_j["telefone"] != cliente_alterado_j["telefone"]:
+            self.fail("Mudou o cliente errado")
+        
+        if cliente_antes_j["nome"] == cliente_alterado_j["nome"]:
+            self.fail("As informações não foram alteradas")
+
+
+    def teste_011_PUT_itensPedido(self):
+        itemPedido_antes = requests.get('http://127.0.0.1:5000/itensPedido/1')
+        self.assertEqual(itemPedido_antes.status_code,200)
+
+        r = requests.put('http://127.0.0.1:5000/itensPedido/1', json={
+            "SKU_item": "A123", 
+            "quantidade": 200,
+            "prazo": 99
+
+        })
+        self.assertEqual(r.status_code,200)
+
+        itemPedido_alterado = requests.get('http://127.0.0.1:5000/itensPedido/1')
+        self.assertEqual(itemPedido_alterado.status_code,200)
+
+        itemPedido_alterado_j = itemPedido_alterado.json()
+        itemPedido_antes_j = itemPedido_antes.json()
+
+        if itemPedido_antes_j["id"] != itemPedido_alterado_j["id"]:
+            self.fail("Mudou o Item Pedido errado")
+        
+        if itemPedido_antes_j["prazo"] == itemPedido_alterado_j["prazo"]:
+            self.fail("As informações não foram alteradas")
 
     def teste_012_PUT_pedidos(self):
-        pass
+        pedido_antes = requests.get('http://localhost:5000/pedidos/1')
+        self.assertEqual(pedido_antes.status_code, 200)
 
+        r = requests.put('http://localhost:5000/pedidos/1', json={
+            "id_item_pedido": 2,
+            "telefone_cliente": "11 97255-9999"
+        }) 
+        self.assertEqual(r.status_code, 200)
+
+        pedido_alterado = requests.get('http://localhost:5000/pedidos/1')
+        self.assertEqual(pedido_alterado.status_code, 200)
+
+        pedido_antes_j = pedido_antes.json()
+        pedido_alterado_j = pedido_alterado.json()
+
+        if pedido_antes_j["id"] != pedido_alterado_j["id"]:
+            self.fail("Mudou o Pedido errado")
+
+        if pedido_antes_j["id_item_pedido"] == pedido_alterado_j["id_item_pedido"]:
+            self.fail("As informações não foram alteradas")
     #DELETE
     def teste_013_DELETE_itens(self):
         #cria um item com SKU: apagado
