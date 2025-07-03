@@ -109,10 +109,10 @@ class TestStringMethods(unittest.TestCase):
 
     def teste_007_POST_itens_pedido(self):
         r = requests.post('http://127.0.0.1:5000/itensPedido',json={"id": 1000, "SKU_item": "V1", "quantidade": 1, "prazo": 0})
-        self.assertEqual(r.status_code,200)
+        self.assertEqual(r.status_code,201)
 
         r = requests.post('http://127.0.0.1:5000/itensPedido',json={"id": 2000, "SKU_item": "V2", "quantidade": 2, "prazo": 7})
-        self.assertEqual(r.status_code,200)
+        self.assertEqual(r.status_code,201)
 
         r_lista = requests.get('http://127.0.0.1:5000/itensPedido')
         lista_retornada = r_lista.json()
@@ -303,10 +303,10 @@ class TestStringMethods(unittest.TestCase):
 
     def teste_015_DELETE_itensPedido(self):
         r = requests.post('http://127.0.0.1:5000/itensPedido',json={"id": 1999999999, "SKU_item": "V1", "quantidade": 1, "prazo": 0})
-        self.assertEqual(r.status_code,200)
+        self.assertEqual(r.status_code,201)
 
         r = requests.post('http://127.0.0.1:5000/itensPedido',json={"id": 2999999999, "SKU_item": "V2", "quantidade": 2, "prazo": 7})
-        self.assertEqual(r.status_code,200)
+        self.assertEqual(r.status_code,201)
 
         achei_apagado = False
         achei_continua = False
@@ -382,7 +382,7 @@ class TestStringMethods(unittest.TestCase):
 
     def teste_019_GETbyID_itensPedido(self):
         r = requests.post('http://127.0.0.1:5000/itensPedido',json={"id": 999999999, "SKU_item": "999999999", "quantidade": 1, "prazo": 0})
-        self.assertEqual(r.status_code,200)
+        self.assertEqual(r.status_code,201)
 
         resposta = requests.get('http://localhost:5000/itensPedido/999999999')
         dict_retornado = resposta.json()
