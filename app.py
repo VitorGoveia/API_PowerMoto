@@ -40,17 +40,35 @@ def get_itens_by_SKU(SKU_item):
 def post_item():
     """Cadastra um item"""
     novo_item = request.json
+
+    campos_obrigatorios = ["SKU","nome", "valor", "marca"]
+
+    campos_faltantes = []
+    for campo in campos_obrigatorios:
+        if campo not in novo_item:
+            campos_faltantes.append(campo)
+    if len(campos_faltantes) != 0:
+        return jsonify({"erro": f"Campo(s) obrigatório(s) ausente(s): {campos_faltantes}"}), 400
+        
     dados_itens = dici["Itens"]
     dados_itens.append(novo_item)
-    return jsonify("Item cadastrado com sucesso")
+    return jsonify({"mensagem": "Item cadastrado com sucesso"}),201
 
 @app.route('/itens/<string:sku_item>', methods=['PUT'])
 def put_item(sku_item):
     """Alterar informações do item"""
     itens = dici["Itens"]
+
+    campos_obrigatorios = ["SKU","nome", "valor", "marca"]
+
+    novo_item = request.json
+    
+    for campo in campos_obrigatorios:
+        if campo not in novo_item:
+            return jsonify({"erro": f"Campo(s) obrigatório(s) ausente(s): {campo}"}), 400
+        
     for item in itens:
         if item["SKU"] == sku_item:
-            novo_item = request.json
             item["nome"] = novo_item["nome"]
             item["valor"] = novo_item["valor"]
             item["marca"] = novo_item["marca"]
@@ -88,8 +106,18 @@ def post_cliente():
     """Cadastra um cliente"""
     novo_cliente = request.json
     dados_clientes= dici["Clientes"]
+
+    campos_obrigatorios = ["telefone", "nome"]
+
+    campos_faltantes = []
+    for campo in campos_obrigatorios:
+        if campo not in novo_cliente:
+            campos_faltantes.append(campo)
+    if len(campos_faltantes) != 0:        
+        return jsonify({"erro": f"Campo(s) obrigatório(s) ausente(s): {campos_faltantes}"}),400
+
     dados_clientes.append(novo_cliente)
-    return jsonify("Cliente cadastrado com sucesso")
+    return jsonify({"mensagem": "Cliente cadastrado com sucesso"}),201
 
 @app.route('/clientes/<string:numero_cliente>', methods=['PUT'])
 def put_clientes(numero_cliente):
@@ -133,18 +161,21 @@ def post_item_pedido():
     novo_item_pedido = request.json
     dados_itens_pedido = dici["Itens_Pedido"]
 
-    campos_obrigatorios = ["SKU_item", "quantidade", "prazo"]
+    campos_obrigatorios = ["SKU_item", "quantidade", "prazo", "id", "valor_item_pedido"]
 
+    campos_faltantes = []
     for campo in campos_obrigatorios:
         if campo not in novo_item_pedido:
-            return jsonify({"erro": f"Campo obrigatório ausente: {campo}"}), 400
+            campos_faltantes.append(campo)
+    if len(campos_faltantes) != 0:
+        return jsonify({"erro": f"Campo(s) obrigatório(s) ausente(s): {campos_faltantes}"}), 400
     
     sku_valido = any(item["SKU"] == novo_item_pedido["SKU_item"] for item in dici["Itens"])
     if not sku_valido:
         return jsonify({"erro": "SKU_item não encontrado nos Itens"}), 404
     else:
         dados_itens_pedido.append(novo_item_pedido)
-        return jsonify("Item do Pedido cadastrado com sucesso"), 201
+        return jsonify({"mensagem": "Item do Pedido cadastrado com sucesso"}), 201
 
 @app.route('/itensPedido/<int:id_item_pedido>', methods=['PUT'])
 def put_item_pedido(id_item_pedido):
@@ -155,7 +186,7 @@ def put_item_pedido(id_item_pedido):
 
     for campo in campos_obrigatorios:
         if campo not in novo_item_pedido:
-            return jsonify({"erro": f"Campo obrigatório ausente: {campo}"}), 400
+            return jsonify({"erro": f"Campo(s) obrigatório(s) ausente(s): {campo}"}), 400
 
     sku_valido = any(item["SKU"] == novo_item_pedido["SKU_item"] for item in dici["Itens"])
     if not sku_valido:
@@ -201,8 +232,27 @@ def post_pedido():
     """Cadastrar pedido"""
     novo_pedido = request.json
     dados_pedidos = dici["Pedidos"]
-    dados_pedidos.append(novo_pedido)
-    return jsonify("Pedido cadastrado com sucesso")
+
+    campos_obrigatorios = ["id","telefone_cliente", "id_item_pedido"]
+
+    campos_faltantes = []
+    for campo in campos_obrigatorios:
+        if campo not in novo_pedido:
+            campos_faltantes.append(campo)
+
+    if len(campos_faltantes) != 0:        
+        return jsonify({"erro": f"Campo(s) obrigatório(s) ausente(s): {campos_faltantes}"}), 400
+        
+    telefone_cliente_valido = any(cliente["telefone"] == novo_pedido["telefone_cliente"] for cliente in dici["Clientes"])
+    id_itemPedido_valido = any(itemPedido["id"] == novo_pedido["id_item_pedido"] for itemPedido in dici["Itens_Pedido"])
+    if not(telefone_cliente_valido and id_itemPedido_valido):
+        if not telefone_cliente_valido:
+            return jsonify({"erro": "Telefone do cliente não encontrado nos clientes"}), 404
+        else:
+            return jsonify({"erro": "Item do pedido não encontrado nos Itens do pedido"}), 404
+    else: 
+        dados_pedidos.append(novo_pedido)
+        return jsonify({"mensagem": "Pedido cadastrado com sucesso"}), 201
 
 @app.route('/pedidos/<int:id_pedido>', methods=['PUT'])
 def put_pedido(id_pedido):

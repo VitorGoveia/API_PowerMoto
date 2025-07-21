@@ -60,10 +60,10 @@ class TestStringMethods(unittest.TestCase):
     def teste_005_POST_itens(self):
         #criar dois itens (usando post na url /itens)
         r = requests.post('http://127.0.0.1:5000/itens',json={"SKU": "V1","nome": "Carro", "valor": 12000, "marca": "Bajaj"})
-        self.assertEqual(r.status_code,200)
+        self.assertEqual(r.status_code,201)
 
         r = requests.post('http://127.0.0.1:5000/itens',json={"SKU": "V2","nome": "Moto", "valor": 10000, "marca": "Bajaj"})
-        self.assertEqual(r.status_code,200)
+        self.assertEqual(r.status_code,201)
 
         #pego a lista de itens
         r_lista = requests.get('http://127.0.0.1:5000/itens')
@@ -86,10 +86,10 @@ class TestStringMethods(unittest.TestCase):
 
     def teste_006_POST_clientes(self):
         r = requests.post('http://127.0.0.1:5000/clientes',json={"telefone": "1234", "nome": "Vitor"})
-        self.assertEqual(r.status_code,200)
+        self.assertEqual(r.status_code,201)
 
         r = requests.post('http://127.0.0.1:5000/clientes',json={"telefone": "5678", "nome": "Miguel"})
-        self.assertEqual(r.status_code,200)
+        self.assertEqual(r.status_code,201)
 
         r_lista = requests.get('http://127.0.0.1:5000/clientes')
         lista_retornada = r_lista.json()
@@ -132,10 +132,10 @@ class TestStringMethods(unittest.TestCase):
 
     def teste_008_POST_pedido(self):
         r = requests.post('http://127.0.0.1:5000/pedidos',json={"id": 1000, "telefone_cliente": "1234", "id_item_pedido": 1000})
-        self.assertEqual(r.status_code,200)
+        self.assertEqual(r.status_code,201)
 
         r = requests.post('http://127.0.0.1:5000/pedidos',json={"id": 2000, "telefone_cliente": "5678", "id_item_pedido": 2000})
-        self.assertEqual(r.status_code,200)
+        self.assertEqual(r.status_code,201)
 
         r_lista = requests.get('http://127.0.0.1:5000/pedidos')
         lista_retornada = r_lista.json()
@@ -248,10 +248,10 @@ class TestStringMethods(unittest.TestCase):
     def teste_013_DELETE_itens(self):
         #cria um item com SKU: apagado
         r = requests.post('http://127.0.0.1:5000/itens',json={"SKU": "apagado","nome": "Teste", "valor": 12000, "marca": "Bajaj"})
-        self.assertEqual(r.status_code,200)
+        self.assertEqual(r.status_code,201)
         #cria um item com SKU: continua
         r = requests.post('http://127.0.0.1:5000/itens',json={"SKU": "continua","nome": "Teste", "valor": 12000, "marca": "Bajaj"})
-        self.assertEqual(r.status_code,200)
+        self.assertEqual(r.status_code,201)
 
         #Cria variaveis para verificar se os itens foram apagados mesmo
         achei_apagado = False
@@ -277,10 +277,10 @@ class TestStringMethods(unittest.TestCase):
 
     def teste_014_DELETE_clientes(self):
         r = requests.post('http://127.0.0.1:5000/clientes',json={"telefone": "apagado", "nome": "apagado"})
-        self.assertEqual(r.status_code,200)
+        self.assertEqual(r.status_code,201)
 
         r = requests.post('http://127.0.0.1:5000/clientes',json={"telefone": "continua", "nome": "continua"})
-        self.assertEqual(r.status_code,200)
+        self.assertEqual(r.status_code,201)
 
         achei_apagado = False
         achei_continua = False
@@ -329,10 +329,10 @@ class TestStringMethods(unittest.TestCase):
 
     def teste_016_DELETE_pedidos(self):
         r = requests.post('http://127.0.0.1:5000/pedidos',json={"id": 1999999999, "telefone_cliente": "1234", "id_item_pedido": 2999999999})
-        self.assertEqual(r.status_code,200)
+        self.assertEqual(r.status_code,201)
 
         r = requests.post('http://127.0.0.1:5000/pedidos',json={"id": 2999999999, "telefone_cliente": "5678", "id_item_pedido": 2999999999})
-        self.assertEqual(r.status_code,200)
+        self.assertEqual(r.status_code,201)
         
         achei_apagado = False
         achei_continua = False
@@ -357,7 +357,7 @@ class TestStringMethods(unittest.TestCase):
     def teste_017_GETbyID_itens(self):
         #cria um item com SKU: 999999999
         r = requests.post('http://127.0.0.1:5000/itens',json={"SKU": "999999999","nome": "Teste", "valor": 12000, "marca": "Bajaj"})
-        self.assertEqual(r.status_code,200)
+        self.assertEqual(r.status_code,201)
 
         #consulta a url /itens/999999999
         resposta = requests.get('http://localhost:5000/itens/999999999')
@@ -371,7 +371,7 @@ class TestStringMethods(unittest.TestCase):
 
     def teste_018_GETbyID_clientes(self):
         r = requests.post('http://127.0.0.1:5000/clientes',json={"telefone": "999999999", "nome": "Vitor"})
-        self.assertEqual(r.status_code,200)
+        self.assertEqual(r.status_code,201)
 
         resposta = requests.get('http://localhost:5000/clientes/999999999')
         dict_retornado = resposta.json()
@@ -393,7 +393,7 @@ class TestStringMethods(unittest.TestCase):
 
     def teste_020_GETbyID_pedidos(self):
         r = requests.post('http://127.0.0.1:5000/pedidos',json={"id": 999999999, "telefone_cliente": "999999999", "id_item_pedido": 999999999})
-        self.assertEqual(r.status_code,200)
+        self.assertEqual(r.status_code,201)
 
         resposta = requests.get('http://localhost:5000/pedidos/999999999')
         dict_retornado = resposta.json()
