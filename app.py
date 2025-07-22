@@ -9,6 +9,16 @@ dici = {
     "Pedidos":[{"id": 1, "telefone_cliente": "11 97252-9448", "id_item_pedido": 1}]
 }
 
+def verificar_campos(campos_obrigatorios, novo_obj):
+    """ Verifica a presença dos campos obrigatórios """
+    campos_faltantes = []
+    for campo in campos_obrigatorios:
+        if campo not in novo_obj:
+            campos_faltantes.append(campo)
+
+    if len(campos_faltantes) != 0:        
+        return jsonify({"erro": f"Campo(s) obrigatório(s) ausente(s): {campos_faltantes}"}), 400
+
 # Seção Reseta
 
 @app.route('/reseta', methods=['POST'])
@@ -43,12 +53,9 @@ def post_item():
 
     campos_obrigatorios = ["SKU","nome", "valor", "marca"]
 
-    campos_faltantes = []
-    for campo in campos_obrigatorios:
-        if campo not in novo_item:
-            campos_faltantes.append(campo)
-    if len(campos_faltantes) != 0:
-        return jsonify({"erro": f"Campo(s) obrigatório(s) ausente(s): {campos_faltantes}"}), 400
+    resposta = verificar_campos(campos_obrigatorios, novo_item)
+    if resposta:
+        return resposta
         
     dados_itens = dici["Itens"]
     dados_itens.append(novo_item)
@@ -109,12 +116,9 @@ def post_cliente():
 
     campos_obrigatorios = ["telefone", "nome"]
 
-    campos_faltantes = []
-    for campo in campos_obrigatorios:
-        if campo not in novo_cliente:
-            campos_faltantes.append(campo)
-    if len(campos_faltantes) != 0:        
-        return jsonify({"erro": f"Campo(s) obrigatório(s) ausente(s): {campos_faltantes}"}),400
+    resposta = verificar_campos(campos_obrigatorios, novo_cliente)
+    if resposta:
+        return resposta
 
     dados_clientes.append(novo_cliente)
     return jsonify({"mensagem": "Cliente cadastrado com sucesso"}),201
@@ -163,12 +167,9 @@ def post_item_pedido():
 
     campos_obrigatorios = ["SKU_item", "quantidade", "prazo", "id", "valor_item_pedido"]
 
-    campos_faltantes = []
-    for campo in campos_obrigatorios:
-        if campo not in novo_item_pedido:
-            campos_faltantes.append(campo)
-    if len(campos_faltantes) != 0:
-        return jsonify({"erro": f"Campo(s) obrigatório(s) ausente(s): {campos_faltantes}"}), 400
+    resposta = verificar_campos(campos_obrigatorios, novo_item_pedido)
+    if resposta:
+        return resposta
     
     sku_valido = any(item["SKU"] == novo_item_pedido["SKU_item"] for item in dici["Itens"])
     if not sku_valido:
@@ -235,14 +236,10 @@ def post_pedido():
 
     campos_obrigatorios = ["id","telefone_cliente", "id_item_pedido"]
 
-    campos_faltantes = []
-    for campo in campos_obrigatorios:
-        if campo not in novo_pedido:
-            campos_faltantes.append(campo)
-
-    if len(campos_faltantes) != 0:        
-        return jsonify({"erro": f"Campo(s) obrigatório(s) ausente(s): {campos_faltantes}"}), 400
-        
+    resposta = verificar_campos(campos_obrigatorios, novo_pedido)
+    if resposta:
+        return resposta
+    
     telefone_cliente_valido = any(cliente["telefone"] == novo_pedido["telefone_cliente"] for cliente in dici["Clientes"])
     id_itemPedido_valido = any(itemPedido["id"] == novo_pedido["id_item_pedido"] for itemPedido in dici["Itens_Pedido"])
     if not(telefone_cliente_valido and id_itemPedido_valido):

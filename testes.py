@@ -108,10 +108,10 @@ class TestStringMethods(unittest.TestCase):
             self.fail('cliente Miguel nao apareceu na lista de clientes')
 
     def teste_007_POST_itens_pedido(self):
-        r = requests.post('http://127.0.0.1:5000/itensPedido',json={"id": 1000, "SKU_item": "V1", "quantidade": 1, "prazo": 0})
+        r = requests.post('http://127.0.0.1:5000/itensPedido',json={"id": 1000, "SKU_item": "V1", "quantidade": 1, "prazo": 0, "valor_item_pedido": 10})
         self.assertEqual(r.status_code,201)
 
-        r = requests.post('http://127.0.0.1:5000/itensPedido',json={"id": 2000, "SKU_item": "V2", "quantidade": 2, "prazo": 7})
+        r = requests.post('http://127.0.0.1:5000/itensPedido',json={"id": 2000, "SKU_item": "V2", "quantidade": 2, "prazo": 7, "valor_item_pedido": 20})
         self.assertEqual(r.status_code,201)
 
         r_lista = requests.get('http://127.0.0.1:5000/itensPedido')
