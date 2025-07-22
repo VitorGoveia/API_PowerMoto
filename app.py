@@ -66,13 +66,13 @@ def put_item(sku_item):
     """Alterar informações do item"""
     itens = dici["Itens"]
 
-    campos_obrigatorios = ["SKU","nome", "valor", "marca"]
+    campos_obrigatorios = ["nome", "valor", "marca"]
 
     novo_item = request.json
     
-    for campo in campos_obrigatorios:
-        if campo not in novo_item:
-            return jsonify({"erro": f"Campo(s) obrigatório(s) ausente(s): {campo}"}), 400
+    resposta = verificar_campos(campos_obrigatorios, novo_item)
+    if resposta:
+        return resposta
         
     for item in itens:
         if item["SKU"] == sku_item:
@@ -127,6 +127,15 @@ def post_cliente():
 def put_clientes(numero_cliente):
     """Alterar informaçôes dos clientes"""
     clientes = dici["Clientes"]
+    novo_cliente = request.json
+    
+    campos_obrigatorios = ["nome"]
+
+    resposta = verificar_campos(campos_obrigatorios, novo_cliente)
+    if resposta:
+        return resposta
+
+    
     for cliente in clientes:
         if cliente["telefone"] == numero_cliente:
             novo_cliente = request.json
@@ -183,22 +192,23 @@ def put_item_pedido(id_item_pedido):
     """Atualiza um item do pedido pelo ID"""
 
     novo_item_pedido = request.json
-    campos_obrigatorios = ["SKU_item", "quantidade", "prazo"]
+    campos_obrigatorios = ["SKU_item", "quantidade", "prazo", "valor_item_pedido"]
 
-    for campo in campos_obrigatorios:
-        if campo not in novo_item_pedido:
-            return jsonify({"erro": f"Campo(s) obrigatório(s) ausente(s): {campo}"}), 400
-
+    resposta = verificar_campos(campos_obrigatorios, novo_item_pedido)
+    if resposta:
+        return resposta
+    
     sku_valido = any(item["SKU"] == novo_item_pedido["SKU_item"] for item in dici["Itens"])
     if not sku_valido:
         return jsonify({"erro": "SKU_item não encontrado nos Itens"}), 404
-
-    for item_pedido in dici["Itens_Pedido"]:
-        if item_pedido["id"] == id_item_pedido:
-            item_pedido["SKU_item"] = novo_item_pedido["SKU_item"]
-            item_pedido["quantidade"] = novo_item_pedido["quantidade"]
-            item_pedido["prazo"] = novo_item_pedido["prazo"]
-            return jsonify({"mensagem": "Item do Pedido atualizado com sucesso"}), 200
+    else:
+        for item_pedido in dici["Itens_Pedido"]:
+            if item_pedido["id"] == id_item_pedido:
+                item_pedido["SKU_item"] = novo_item_pedido["SKU_item"]
+                item_pedido["quantidade"] = novo_item_pedido["quantidade"]
+                item_pedido["prazo"] = novo_item_pedido["prazo"]
+                item_pedido["valor_item_pedido"] = novo_item_pedido["valor_item_pedido"]
+                return jsonify({"mensagem": "Item do Pedido atualizado com sucesso"}), 200
 
     return jsonify({"erro": "Item do Pedido com esse ID não foi encontrado"}), 404
 
@@ -254,14 +264,30 @@ def post_pedido():
 @app.route('/pedidos/<int:id_pedido>', methods=['PUT'])
 def put_pedido(id_pedido):
     """Alterar dados do pedido"""
+    novo_pedido = request.json
     pedidos = dici["Pedidos"]
-    for pedido in pedidos:
-        if pedido["id"] == id_pedido:
-            novo_pedido = request.json
-            pedido["telefone_cliente"] = novo_pedido["telefone_cliente"]
-            pedido["id_item_pedido"] = novo_pedido["id_item_pedido"]
-            return jsonify("Alteração feita com sucesso")
-    return jsonify("Pedido não encontrado")
+    
+    campos_obrigatorios = ["telefone_cliente", "id_item_pedido"]
+
+    resposta = verificar_campos(campos_obrigatorios, novo_pedido)
+    if resposta:
+        return resposta
+    
+    telefone_cliente_valido = any(cliente["telefone"] == novo_pedido["telefone_cliente"] for cliente in dici["Clientes"])
+    id_itemPedido_valido = any(itemPedido["id"] == novo_pedido["id_item_pedido"] for itemPedido in dici["Itens_Pedido"])
+    if not(telefone_cliente_valido and id_itemPedido_valido):
+        if not telefone_cliente_valido:
+            return jsonify({"erro": "Telefone do cliente não encontrado nos clientes"}), 404
+        else:
+            return jsonify({"erro": "Item do pedido não encontrado nos Itens do pedido"}), 404
+    else:
+        for pedido in pedidos:
+            if pedido["id"] == id_pedido:
+                novo_pedido = request.json
+                pedido["telefone_cliente"] = novo_pedido["telefone_cliente"]
+                pedido["id_item_pedido"] = novo_pedido["id_item_pedido"]
+                return jsonify("Alteração feita com sucesso")
+        return jsonify("Pedido não encontrado")
 
 @app.route('/pedidos/<int:id_pedido>', methods=['DELETE'])
 def deletar_pedido(id_pedido):

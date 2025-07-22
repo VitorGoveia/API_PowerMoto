@@ -206,8 +206,8 @@ class TestStringMethods(unittest.TestCase):
         r = requests.put('http://127.0.0.1:5000/itensPedido/1', json={
             "SKU_item": "A123", 
             "quantidade": 200,
-            "prazo": 99
-
+            "prazo": 99,
+            "valor_item_pedido": 1000
         })
         self.assertEqual(r.status_code,200)
 
@@ -228,8 +228,8 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(pedido_antes.status_code, 200)
 
         r = requests.put('http://localhost:5000/pedidos/1', json={
-            "id_item_pedido": 2,
-            "telefone_cliente": "11 97255-9999"
+            "id_item_pedido": 2000,
+            "telefone_cliente": "11972529448"
         }) 
         self.assertEqual(r.status_code, 200)
 
