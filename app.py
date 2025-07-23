@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request
+from Item import model_item
 
 app = Flask(__name__)
 
@@ -34,63 +35,48 @@ def reseta():
 @app.route('/itens', methods=['GET'])
 def get_itens():
     """Retorna todos os itens cadastrados"""
-    dados_itens = dici["Itens"]
-    return jsonify(dados_itens)
+    resposta = model_item.listar_itens()
+    return jsonify(resposta)
 
 @app.route('/itens/<string:SKU_item>', methods=['GET'])
 def get_itens_by_SKU(SKU_item):
     """Retorna o item com a SKU no endpoint, caso ele exista"""
-    dados_itens = dici["Itens"]
-    for item in dados_itens:
-        if item["SKU"] == SKU_item:
-            return jsonify(item)
-    return jsonify("Erro: Item não encontrado")
+    resposta = model_item.buscar_item_por_id(SKU_item)
+    if resposta:
+        return jsonify(resposta), 200
+    return jsonify({"Erro": "Item não encontrado"}),404
 
 @app.route('/itens', methods=['POST'])
 def post_item():
     """Cadastra um item"""
     novo_item = request.json
-
-    campos_obrigatorios = ["SKU","nome", "valor", "marca"]
-
-    resposta = verificar_campos(campos_obrigatorios, novo_item)
+    resposta = model_item.adicionar_item(novo_item)
     if resposta:
-        return resposta
+        return jsonify(resposta), 400
         
-    dados_itens = dici["Itens"]
-    dados_itens.append(novo_item)
     return jsonify({"mensagem": "Item cadastrado com sucesso"}),201
 
-@app.route('/itens/<string:sku_item>', methods=['PUT'])
-def put_item(sku_item):
+@app.route('/itens/<string:SKU_item>', methods=['PUT'])
+def put_item(SKU_item):
     """Alterar informações do item"""
-    itens = dici["Itens"]
-
-    campos_obrigatorios = ["nome", "valor", "marca"]
-
     novo_item = request.json
     
-    resposta = verificar_campos(campos_obrigatorios, novo_item)
-    if resposta:
-        return resposta
-        
-    for item in itens:
-        if item["SKU"] == sku_item:
-            item["nome"] = novo_item["nome"]
-            item["valor"] = novo_item["valor"]
-            item["marca"] = novo_item["marca"]
-            return jsonify("Alteração feita")   
-    return jsonify("SKU do item, não encontrado  ")
+    resposta = model_item.alterar_item(SKU_item, novo_item)
+    if resposta == "Sucesso":
+        return jsonify({"Mensagem": "Alterações feitas com sucesso"}), 200
+    elif not resposta:
+        return jsonify({"Erro": "SKU do item, não encontrado"}), 400
+    else:
+        return jsonify(resposta), 400 
 
-@app.route('/itens/<string:sku_item>', methods=['DELETE'])
-def deletar_item(sku_item):
+@app.route('/itens/<string:SKU_item>', methods=['DELETE'])
+def delete_item(SKU_item):
     """Deleta item registrado"""
-    itens = dici["Itens"]
-    for item in itens:
-        if item["SKU"] == sku_item:
-            itens.remove(item)
-            return jsonify(item)
-    return jsonify("Item não encontrado")
+
+    resposta = model_item.deletar_item(SKU_item)
+    if resposta:
+        return jsonify(resposta), 200
+    return jsonify({"Erro": "Item não encontrado"}), 400
     
 #CLIENTES:
 @app.route('/clientes', methods=['GET'])
