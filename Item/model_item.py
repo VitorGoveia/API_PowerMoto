@@ -1,16 +1,7 @@
+from Utils.Validacao_campos import verificar_campos
+
 dici = {
     "Itens": [{"SKU": "A123","nome": "arruela", "valor": 1.2, "marca": "Bajaj"}]}
-
-
-def verificar_campos(campos_obrigatorios, novo_obj):
-    """ Verifica a presença dos campos obrigatórios """
-    campos_faltantes = []
-    for campo in campos_obrigatorios:
-        if campo not in novo_obj:
-            campos_faltantes.append(campo)
-
-    if len(campos_faltantes) != 0:         
-        return f"Campo(s) obrigatório(s) ausente(s): {campos_faltantes}"
 
 #ITENS 
 def listar_itens():
@@ -63,6 +54,5 @@ def deletar_item(sku_item):
     for item in itens:
         if item["SKU"] == sku_item:
             itens.remove(item)
-
             return {"Mensagem": f"Item com SKU: {sku_item} deletado"}
     return None

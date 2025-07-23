@@ -1,5 +1,9 @@
 from flask import Flask, jsonify, request
 from Item import model_item
+from Cliente import model_cliente
+
+#remover no fim do MVC
+from Utils.Validacao_campos import verificar_campos
 
 app = Flask(__name__)
 
@@ -9,16 +13,6 @@ dici = {
     "Itens_Pedido":[{"id": 1, "SKU_item": "A123", "quantidade": 2, "prazo": 110, "valor_item_pedido": 2.4}],
     "Pedidos":[{"id": 1, "telefone_cliente": "11 97252-9448", "id_item_pedido": 1}]
 }
-
-def verificar_campos(campos_obrigatorios, novo_obj):
-    """ Verifica a presença dos campos obrigatórios """
-    campos_faltantes = []
-    for campo in campos_obrigatorios:
-        if campo not in novo_obj:
-            campos_faltantes.append(campo)
-
-    if len(campos_faltantes) != 0:        
-        return jsonify({"erro": f"Campo(s) obrigatório(s) ausente(s): {campos_faltantes}"}), 400
 
 # Seção Reseta
 
@@ -36,7 +30,7 @@ def reseta():
 def get_itens():
     """Retorna todos os itens cadastrados"""
     resposta = model_item.listar_itens()
-    return jsonify(resposta)
+    return jsonify(resposta), 200
 
 @app.route('/itens/<string:SKU_item>', methods=['GET'])
 def get_itens_by_SKU(SKU_item):
@@ -65,7 +59,7 @@ def put_item(SKU_item):
     if resposta == "Sucesso":
         return jsonify({"Mensagem": "Alterações feitas com sucesso"}), 200
     elif not resposta:
-        return jsonify({"Erro": "SKU do item, não encontrado"}), 400
+        return jsonify({"Erro": "SKU do item, não encontrado"}), 404
     else:
         return jsonify(resposta), 400 
 
@@ -76,67 +70,54 @@ def delete_item(SKU_item):
     resposta = model_item.deletar_item(SKU_item)
     if resposta:
         return jsonify(resposta), 200
-    return jsonify({"Erro": "Item não encontrado"}), 400
+    return jsonify({"Erro": "Item não encontrado"}), 404
     
 #CLIENTES:
 @app.route('/clientes', methods=['GET'])
 def get_clientes():
     """Retorna todos os clientes cadastrados"""
-    dados_clientes = dici["Clientes"]
-    return jsonify(dados_clientes)
+    resposta = model_cliente.listar_clientes()
+    return jsonify(resposta), 200
 
 @app.route('/clientes/<string:telefone>', methods=['GET'])
 def get_clientes_by_telefone(telefone):
     """Retorna o item com o telefone no endpoint, caso ele exista"""
-    dados_clientes = dici["Clientes"]
-    for cliente in dados_clientes:
-        if cliente["telefone"] == telefone:
-            return jsonify(cliente)
-    return jsonify("Erro: Cliente não encontrado")
+    resposta = model_cliente.listar_clientes_por_telefone(telefone)
+    if resposta:
+        return jsonify(resposta), 200
+    return jsonify({"Erro": "Cliente não encontrado"}), 404
 
 @app.route('/clientes', methods=['POST'])
 def post_cliente():
     """Cadastra um cliente"""
     novo_cliente = request.json
-    dados_clientes= dici["Clientes"]
-
-    campos_obrigatorios = ["telefone", "nome"]
-
-    resposta = verificar_campos(campos_obrigatorios, novo_cliente)
+    
+    resposta = model_cliente.adicionar_cliente(novo_cliente)
     if resposta:
-        return resposta
+        return jsonify(resposta),400
 
-    dados_clientes.append(novo_cliente)
     return jsonify({"mensagem": "Cliente cadastrado com sucesso"}),201
 
 @app.route('/clientes/<string:numero_cliente>', methods=['PUT'])
 def put_clientes(numero_cliente):
     """Alterar informaçôes dos clientes"""
-    clientes = dici["Clientes"]
     novo_cliente = request.json
-    
-    campos_obrigatorios = ["nome"]
 
-    resposta = verificar_campos(campos_obrigatorios, novo_cliente)
-    if resposta:
-        return resposta
-
-    
-    for cliente in clientes:
-        if cliente["telefone"] == numero_cliente:
-            novo_cliente = request.json
-            cliente["nome"] = novo_cliente["nome"]
-            return jsonify("Alterações feitas com sucesso")
-    return jsonify("Cliente não encontrado")
+    resposta = model_cliente.alterar_cliente(numero_cliente, novo_cliente)
+    if resposta == "Sucesso":
+        return jsonify({"Mensagem": "Alterações feitas com sucesso"}), 200
+    elif not resposta:
+        return jsonify({"Erro": "Cliente não encontrado"}), 404
+    else:
+        return jsonify(resposta), 400
 
 @app.route('/clientes/<string:numero_cliente>', methods=['DELETE'])
 def delete_clientes(numero_cliente):
-    clientes = dici["Clientes"]
-    for cliente in clientes:
-        if cliente["telefone"] == numero_cliente:
-            clientes.remove(cliente)
-            return jsonify(cliente)
-    return jsonify('Cliente não encontrado')
+    """Deleta cliente registrado"""
+    resposta = model_cliente.deletar_clientes(numero_cliente)
+    if resposta:
+        return jsonify(resposta), 200
+    return jsonify({"Erro": 'Cliente não encontrado'}), 404
     
 #ITENS PEDIDO:
 @app.route('/itensPedido', methods=['GET'])
