@@ -1,17 +1,17 @@
 from Utils.Validacao_campos import verificar_campos
 
-dici = {
+dici_itens = {
     "Itens": [{"SKU": "A123","nome": "arruela", "valor": 1.2, "marca": "Bajaj"}]}
 
 #ITENS 
 def listar_itens():
     """Retorna todos os itens cadastrados"""
-    dados_itens = dici["Itens"]
+    dados_itens = dici_itens["Itens"]
     return dados_itens
 
 def buscar_item_por_id(SKU_item):
     """Retorna o item com a SKU no endpoint, caso ele exista"""
-    dados_itens = dici["Itens"]
+    dados_itens = dici_itens["Itens"]
     for item in dados_itens:
         if item["SKU"] == SKU_item:
             return item
@@ -25,13 +25,13 @@ def adicionar_item(dados):
     if resposta:
         return resposta
         
-    dados_itens = dici["Itens"]
+    dados_itens = dici_itens["Itens"]
     dados_itens.append(dados)
     return None
 
 def alterar_item(SKU_item, dados):
     """Alterar informações do item"""
-    itens = dici["Itens"]
+    itens = dici_itens["Itens"]
 
     campos_obrigatorios = ["nome", "valor", "marca"]
     
@@ -49,7 +49,7 @@ def alterar_item(SKU_item, dados):
 
 def deletar_item(sku_item):
     """Deleta item registrado"""
-    itens = dici["Itens"]
+    itens = dici_itens["Itens"]
 
     for item in itens:
         if item["SKU"] == sku_item:

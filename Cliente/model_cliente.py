@@ -1,18 +1,18 @@
 from Utils.Validacao_campos import verificar_campos
 
-dici = {
+dici_cliente = {
     "Clientes": [{"telefone": "11972529448", "nome": "Vitor"}]
 }
 
 #CLIENTES:
 def listar_clientes():
     """Retorna todos os clientes cadastrados"""
-    dados_clientes = dici["Clientes"]
+    dados_clientes = dici_cliente["Clientes"]
     return dados_clientes
 
 def listar_clientes_por_telefone(telefone):
     """Retorna o item com o telefone no endpoint, caso ele exista"""
-    dados_clientes = dici["Clientes"]
+    dados_clientes = dici_cliente["Clientes"]
     for cliente in dados_clientes:
         if cliente["telefone"] == telefone:
             return cliente
@@ -20,7 +20,7 @@ def listar_clientes_por_telefone(telefone):
 def adicionar_cliente(dados):
     """Cadastra um cliente"""
    
-    dados_clientes= dici["Clientes"]
+    dados_clientes= dici_cliente["Clientes"]
 
     campos_obrigatorios = ["telefone", "nome"]
 
@@ -33,7 +33,7 @@ def adicionar_cliente(dados):
 
 def alterar_cliente(numero_cliente, dados):
     """Alterar informaçôes dos clientes"""
-    clientes = dici["Clientes"]
+    clientes = dici_cliente["Clientes"]
     
     campos_obrigatorios = ["nome"]
 
@@ -49,7 +49,7 @@ def alterar_cliente(numero_cliente, dados):
 
 def deletar_clientes(numero_cliente):
     """Deleta cliente registrado"""
-    clientes = dici["Clientes"]
+    clientes = dici_cliente["Clientes"]
     
     for cliente in clientes:
         if cliente["telefone"] == numero_cliente:
