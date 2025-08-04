@@ -9,7 +9,7 @@ def listar_itens():
     dados_itens = dici_itens["Itens"]
     return dados_itens
 
-def buscar_item_por_id(SKU_item):
+def listar_item_por_id(SKU_item):
     """Retorna o item com a SKU no endpoint, caso ele exista"""
     dados_itens = dici_itens["Itens"]
     for item in dados_itens:
