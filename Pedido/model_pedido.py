@@ -1,7 +1,17 @@
 from Utils.Validacao_campos import verificar_campos
 from ItemPedido.model_itemPedido import dici_item_pedido
 from Cliente.model_cliente import dici_cliente
+from config import db
+import datetime
 
+class Pedido(db.Model):
+    __tablename__ = "Pedido"
+
+    id_pedido =db.Column(db.Integer, primary_key=True) 
+    data = db.Column(db.Date, nullable=True)
+    telefone_cliente = db.Column(db.Integer, db.ForeignKey('Clientes.telefone'), nullable=False)
+
+    id_item_pedido = db.relationship('ItemPedido', backref='Pedido', lazy=True)
 
 dici_pedido = {
     "Pedidos":[{"id": 1, "telefone_cliente": "11 97252-9448", "id_item_pedido": 1}]

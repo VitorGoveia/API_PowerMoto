@@ -1,4 +1,18 @@
 from Utils.Validacao_campos import verificar_campos
+from config import db
+
+class Cliente(db.Model):
+    __tablename__ = "Cliente"
+
+    id_cliente = db.Column(db.Integer, primary_key= True) 
+    telefone = db.Column(db.Integer, nullable= False)
+    nome = db.Column(db.String(100), nullable= False)
+
+    pedidos = db.relationship('Pedido', backref='Cliente', lazy=True)
+
+    def __repr__(self):
+        return f'Cliente: {self.nome}'
+    
 
 dici_cliente = {
     "Clientes": [{"telefone": "11972529448", "nome": "Vitor"}]

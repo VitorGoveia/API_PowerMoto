@@ -1,5 +1,19 @@
 from Utils.Validacao_campos import verificar_campos
 from Item.model_item import dici_itens
+from config import db
+
+class ItemPedido(db.Model):
+    __tablename__ = 'ItemPedido'
+
+    id_ItemPedido = db.Column(db.Integer, primary_key=True)
+    quantidade = db.Column(db.Integer, nullable=True)
+    prazo = db.Column(db.Integer, nullable=True)
+    valor_itemPedido = db.Column(db.Float, nullable=True)
+
+    Sku_item = db.relationship("Item", backref="ItemPedido", lazy= True)
+
+    def __repr__(self):
+        return f"Item Pedido: {self.id_ItemPedido}"
 
 dici_item_pedido = {
     "Itens_Pedido":[{"id": 1, "SKU_item": "A123", "quantidade": 2, "prazo": 110, "valor_item_pedido": 2.4}]

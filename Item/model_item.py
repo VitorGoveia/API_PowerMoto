@@ -1,4 +1,18 @@
 from Utils.Validacao_campos import verificar_campos
+from config import db
+
+class Item(db.Model):
+    __tablename__ = "Item"
+
+    SKU = db.Column(db.Strig(100), primary_key= True)
+    nome = db.Column(db.String(100), nullable= False)
+    marca = db.COlumn(db.String(75), nullable= False)
+    valor = db.Column(db.Float, nullable= False)
+
+    itens_pedido = db.relationship('ItemPedido', backref="Item", lazy=True)
+
+    def __repr__(self):
+        return f'Item com SKU: {self.SKU}'
 
 dici_itens = {
     "Itens": [{"SKU": "A123","nome": "arruela", "valor": 1.2, "marca": "Bajaj"}]}
