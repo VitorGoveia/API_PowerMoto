@@ -9,4 +9,4 @@ def verificar_campos(campos_obrigatorios, novo_obj):
             campos_faltantes.append(campo)
 
     if len(campos_faltantes) != 0:        
-        return {"erro": f"Campo(s) obrigatório(s) ausente(s): {campos_faltantes}"}
+        return f"Campo(s) obrigatório(s) ausente(s): {campos_faltantes}"

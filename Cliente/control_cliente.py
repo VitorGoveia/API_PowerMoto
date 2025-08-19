@@ -12,9 +12,9 @@ def get_clientes():
 def get_clientes_by_telefone(telefone):
     """Retorna o item com o telefone no endpoint, caso ele exista"""
     resposta = model_cliente.listar_clientes_por_telefone(telefone)
-    if resposta:
-        return jsonify(resposta), 200
-    return jsonify({"Erro": "Cliente não encontrado"}), 404
+    if "Erro" in resposta:
+        return jsonify({"Erro": "Cliente não encontrado"}), 404
+    return jsonify(resposta), 200
 
 @cliente_blueprint.route('/clientes', methods=['POST'])
 def post_cliente():
@@ -22,10 +22,10 @@ def post_cliente():
     novo_cliente = request.json
     
     resposta = model_cliente.adicionar_cliente(novo_cliente)
-    if resposta:
+    if "Erro" in resposta:
         return jsonify(resposta),400
 
-    return jsonify({"mensagem": "Cliente cadastrado com sucesso"}),201
+    return jsonify(resposta),201
 
 @cliente_blueprint.route('/clientes/<string:numero_cliente>', methods=['PUT'])
 def put_clientes(numero_cliente):

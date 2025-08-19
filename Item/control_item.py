@@ -12,19 +12,19 @@ def get_itens():
 def get_itens_by_SKU(SKU_item):
     """Retorna o item com a SKU no endpoint, caso ele exista"""
     resposta = model_item.listar_item_por_id(SKU_item)
-    if resposta:
-        return jsonify(resposta), 200
-    return jsonify({"Erro": "Item não encontrado"}),404
+    if "Erro" in resposta:
+        return jsonify({"Erro": "Item não encontrado"}),404
+    return jsonify(resposta), 200
 
 @item_blueprint.route('/itens', methods=['POST'])
 def post_item():
     """Cadastra um item"""
     novo_item = request.json
     resposta = model_item.adicionar_item(novo_item)
-    if resposta:
+    if "Erro" in resposta:
         return jsonify(resposta), 400
         
-    return jsonify({"mensagem": "Item cadastrado com sucesso"}),201
+    return jsonify(resposta),201
 
 @item_blueprint.route('/itens/<string:SKU_item>', methods=['PUT'])
 def put_item(SKU_item):

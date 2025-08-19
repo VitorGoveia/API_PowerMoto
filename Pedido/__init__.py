@@ -1,1 +1,1 @@
-from Pedido import Pedido
+from .model_pedido import Pedido

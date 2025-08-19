@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from Pedido import model_pedido 
+from Pedido import model_pedido
 
 pedido_blueprint = Blueprint("Pedido", __name__)
 
@@ -12,9 +12,9 @@ def get_pedidos():
 def get_pedido_by_id(id_pedido):
     """Retorna o pedido com o id no endpoint, caso ele exista"""
     resposta = model_pedido.listar_pedido_por_id(id_pedido)
-    if resposta:
-        return jsonify(resposta), 200
-    return jsonify({"Erro": "Pedido não encontrado"}), 404
+    if "Erro" in resposta:
+        return jsonify({"Erro": "Pedido não encontrado"}), 404
+    return jsonify(resposta), 200
 
 @pedido_blueprint.route('/pedidos', methods=['POST'])
 def post_pedido():
@@ -22,15 +22,16 @@ def post_pedido():
     dados = request.json
     resposta = model_pedido.adicionar_pedido(dados)
 
-    if resposta == "Sucesso":
-        return jsonify({"mensagem": "Pedido cadastrado com sucesso"}), 201
-    elif resposta == "Cliente_Não_encontrado":
-        return jsonify({"erro": "Telefone do cliente não encontrado nos clientes"}), 404
-    elif resposta == "Item_Pedido_Não_encontrado":
-        return jsonify({"erro": "Item do pedido não encontrado nos Itens do pedido"}), 404
-    else:
-        return resposta, 400
+    if "Erro" in resposta:
+        if "Cliente" in resposta:
+            return jsonify({"Erro": "Cliente não encontrado"}), 404
+        elif "item" in resposta:
+            return jsonify({"Erro": "Item não encontrado"}), 404
+        else:
+            return jsonify(resposta), 400
 
+    return jsonify({"mensagem": "Pedido cadastrado com sucesso"}), 201
+    
 @pedido_blueprint.route('/pedidos/<int:id_pedido>', methods=['PUT'])
 def put_pedido(id_pedido):
     """Alterar dados do pedido"""

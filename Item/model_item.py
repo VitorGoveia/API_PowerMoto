@@ -2,14 +2,12 @@ from Utils.Validacao_campos import verificar_campos
 from config import db
 
 class Item(db.Model):
-    __tablename__ = "Item"
+    __tablename__ = "item"
 
-    SKU = db.Column(db.Strig(100), primary_key= True)
+    SKU = db.Column(db.String(100), primary_key= True)
     nome = db.Column(db.String(100), nullable= False)
-    marca = db.COlumn(db.String(75), nullable= False)
+    marca = db.Column(db.String(75), nullable= False)
     valor = db.Column(db.Float, nullable= False)
-
-    itens_pedido = db.relationship('ItemPedido', backref="Item", lazy=True)
 
     def __repr__(self):
         return f'Item com SKU: {self.SKU}'
@@ -20,16 +18,29 @@ dici_itens = {
 #ITENS 
 def listar_itens():
     """Retorna todos os itens cadastrados"""
-    dados_itens = dici_itens["Itens"]
-    return dados_itens
+    itens = Item.query.all()
+    return [{
+            "SKU": item.SKU,
+            "nome":item.nome,
+            "marca":item.marca,
+            "valor":item.valor
+        }
+        for item in itens
+    ]
 
 def listar_item_por_id(SKU_item):
     """Retorna o item com a SKU no endpoint, caso ele exista"""
-    dados_itens = dici_itens["Itens"]
-    for item in dados_itens:
-        if item["SKU"] == SKU_item:
-            return item
-    return None
+    item = Item.query.get(SKU_item)
+    
+    if item is None:
+        return {"Erro": "Item não encontrado"}
+    
+    return {
+        "SKU": item.SKU,
+        "nome": item.nome,
+        "marca": item.marca,
+        "valor": item.valor        
+    }
 
 def adicionar_item(dados):
     """Cadastra um item"""  
@@ -37,11 +48,27 @@ def adicionar_item(dados):
 
     resposta = verificar_campos(campos_obrigatorios, dados)
     if resposta:
-        return resposta
-        
-    dados_itens = dici_itens["Itens"]
-    dados_itens.append(dados)
-    return None
+        return {"Erro": resposta}
+    
+    novo_item = Item(
+            SKU = dados["SKU"],
+            nome = dados["nome"],
+            marca = dados["marca"],
+            valor = dados["valor"]
+        )
+    
+    db.session.add(novo_item)
+    db.session.commit()
+
+    return {
+        "Mensagem": "Item criado com sucesso!",
+        "Item": {
+            "SKU": novo_item.SKU,
+            "nome": novo_item.nome,
+            "marca":novo_item.marca,
+            "valor":novo_item.valor
+        }
+    }
 
 def alterar_item(SKU_item, dados):
     """Alterar informações do item"""

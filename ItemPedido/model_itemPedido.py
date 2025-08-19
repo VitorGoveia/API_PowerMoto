@@ -1,19 +1,23 @@
 from Utils.Validacao_campos import verificar_campos
-from Item.model_item import dici_itens
+from Item.model_item import dici_itens, Item
 from config import db
 
 class ItemPedido(db.Model):
-    __tablename__ = 'ItemPedido'
+    __tablename__ = "item_pedido"
 
     id_ItemPedido = db.Column(db.Integer, primary_key=True)
     quantidade = db.Column(db.Integer, nullable=True)
     prazo = db.Column(db.Integer, nullable=True)
-    valor_itemPedido = db.Column(db.Float, nullable=True)
+    valor_item_pedido = db.Column(db.Float, nullable=True)
 
-    Sku_item = db.relationship("Item", backref="ItemPedido", lazy= True)
+    SKU_item = db.Column(db.String(100), db.ForeignKey("item.SKU"), nullable=False)
+    id_pedido = db.Column(db.Integer, db.ForeignKey("pedido.id_pedido"), nullable=False)
+
+    item = db.relationship("Item", backref="itens_pedido")
+    pedido = db.relationship("Pedido", backref="itens_pedido")
 
     def __repr__(self):
-        return f"Item Pedido: {self.id_ItemPedido}"
+        return f"ItemPedido: {self.id_ItemPedido}, Pedido: {self.id_pedido}, SKU: {self.SKU_item}"
 
 dici_item_pedido = {
     "Itens_Pedido":[{"id": 1, "SKU_item": "A123", "quantidade": 2, "prazo": 110, "valor_item_pedido": 2.4}]
@@ -21,33 +25,73 @@ dici_item_pedido = {
 
 def listar_itens_pedido():
     """Retorna todos os itens de pedido cadastrados"""
-    dados_itens_pedido = dici_item_pedido["Itens_Pedido"]
-    return dados_itens_pedido
+    itens_pedido = ItemPedido.query.all()
+    return [{
+        "Id": item_pedido.id_ItemPedido,
+        "Quantidade": item_pedido.quantidade,
+        "Prazo": item_pedido.prazo, 
+        "Valor Item do Pedido": item_pedido.valor_item_pedido
+    }
+    for item_pedido in itens_pedido
+    ]
 
 def listar_itens_pedido_por_id(id_item_pedido):
     """Retorna o item com o id do item do pedido no endpoint, caso ele exista"""
-    dados_itensPedido = dici_item_pedido["Itens_Pedido"]
-    for itensPedido in dados_itensPedido:
-        if itensPedido["id"] == id_item_pedido:
-            return itensPedido
-    return None
+    item_pedido = ItemPedido.query.get(id_item_pedido)
+    
+    if item_pedido is None:
+        return {"Erro": "Item do pedido não encontrado"}
+
+    return {
+            "Id": item_pedido.id_ItemPedido,
+            "SKU_item": item_pedido.SKU_item,
+            "Quantidade": item_pedido.quantidade,
+            "Prazo": item_pedido.prazo, 
+            "Valor Item do Pedido": item_pedido.valor_item_pedido
+            } 
 
 def adicionar_item_pedido(dados):
-    """Cadastra um item do pedido"""
-    dados_itens_pedido = dici_item_pedido["Itens_Pedido"]
+    from Pedido.model_pedido import Pedido
 
-    campos_obrigatorios = ["SKU_item", "quantidade", "prazo", "id", "valor_item_pedido"]
+    """Cadastra um item do pedido"""
+    campos_obrigatorios = ["SKU_item", "quantidade", "prazo", "id_pedido"]
 
     resposta = verificar_campos(campos_obrigatorios, dados)
     if resposta:
-        return resposta
+        return {"Erro": resposta}
     
-    sku_valido = any(item["SKU"] == dados["SKU_item"] for item in dici_itens["Itens"])
-    if not sku_valido:
-        return None
+    item = Item.query.filter_by(SKU=dados["SKU_item"]).first()
+    if not item:
+        return {"Erro": "Item não encontrado"}
+    
+    pedido = Pedido.query.get(dados["id_pedido"])
+    if not pedido:
+        return {"Erro": "Pedido não encontrado"}
+    
     else:
-        dados_itens_pedido.append(dados)
-        return "Sucesso"
+        quantidade = dados["quantidade"]
+
+        novo_item_pedido = ItemPedido(
+            quantidade = quantidade,
+            prazo = dados["prazo"],
+            SKU_item = dados["SKU_item"],
+            valor_item_pedido = item.valor * quantidade,
+            id_pedido = dados["id_pedido"]
+        )
+
+        db.session.add(novo_item_pedido)
+        db.session.commit()
+
+        return {
+            "Mensagem": "Item_Pedido cadastrado com sucesso",
+            "Item_Pedido": {
+            "Id": novo_item_pedido.id_ItemPedido,
+            "SKU_item": novo_item_pedido.SKU_item,
+            "Quantidade": novo_item_pedido.quantidade,
+            "Prazo": novo_item_pedido.prazo, 
+            "Valor Item do Pedido": novo_item_pedido.valor_item_pedido
+            }
+        }
 
 def alterar_item_pedido(id_item_pedido, dados):
     """Atualiza um item do pedido pelo ID"""

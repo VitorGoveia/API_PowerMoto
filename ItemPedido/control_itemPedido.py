@@ -12,9 +12,9 @@ def get_itens_pedido():
 def get_itens_pedido_by_id(id_item_pedido):
     """Retorna o item com o id do item do pedido no endpoint, caso ele exista"""
     resposta = model_itemPedido.listar_itens_pedido_por_id(id_item_pedido)
-    if resposta:
-        return jsonify(resposta), 200
-    return jsonify({"Erro": "Item do pedido não encontrado"}), 404
+    if "Erro" in resposta:
+        return jsonify({"Erro": "Item do pedido não encontrado"}), 404
+    return jsonify(resposta), 200
 
 @item_pedido_blueprint.route('/itensPedido', methods=['POST'])
 def post_item_pedido():
@@ -22,12 +22,13 @@ def post_item_pedido():
     novo_item_pedido = request.json
 
     resposta = model_itemPedido.adicionar_item_pedido(novo_item_pedido)
-    if resposta == "Sucesso":
-        return jsonify({"Mensagem": "Item do pedido adicionado com sucesso"}), 201
-    elif not resposta:
-        return jsonify({"erro": "SKU_item não encontrado nos Itens"}), 404
-    else:
-        return jsonify(resposta), 400
+
+    if "Erro" in resposta:
+        if "Item" in resposta:
+            return jsonify({"erro": "SKU_item não encontrado nos Itens"}), 404
+        else:    
+            return jsonify(resposta), 400
+    return jsonify({"Mensagem": "Item do pedido adicionado com sucesso"}), 201
 
 @item_pedido_blueprint.route('/itensPedido/<int:id_item_pedido>', methods=['PUT'])
 def put_item_pedido(id_item_pedido):
