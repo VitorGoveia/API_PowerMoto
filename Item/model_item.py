@@ -13,13 +13,9 @@ class Item(db.Model):
     def __repr__(self):
         return f'Item com SKU: {self.SKU}'
 
-dici_itens = {
-    "Itens": [{"SKU": "A123","nome": "arruela", "valor": 1.2, "marca": "Bajaj"}]}
-
-#ITENS 
 def listar_itens():
     """Retorna todos os itens cadastrados"""
-    itens = Item.query.all()
+    itens = Item.query.filter_by(status=True).all()
     return [{
             "SKU": item.SKU,
             "nome":item.nome,
@@ -33,9 +29,12 @@ def listar_item_por_id(SKU_item):
     """Retorna o item com a SKU no endpoint, caso ele exista"""
     item = Item.query.get(SKU_item)
     
+    if item.status == False:
+        return {"Erro": "Item inativo"}
+
     if item is None:
         return {"Erro": "Item não encontrado"}
-    
+
     return {
         "SKU": item.SKU,
         "nome": item.nome,
@@ -72,23 +71,33 @@ def adicionar_item(dados):
         }
     }
 
-def alterar_item(SKU_item, dados):
+def alterar_item(sku_item, dados):
     """Alterar informações do item"""
-    itens = dici_itens["Itens"]
+    item = Item.query.get(sku_item)
 
-    campos_obrigatorios = ["nome", "valor", "marca"]
+    campos_obrigatorios = ["nome", "valor", "marca", "status"]
     
     resposta = verificar_campos(campos_obrigatorios, dados)
     if resposta:
         return resposta
-        
-    for item in itens:
-        if item["SKU"] == SKU_item:
-            item["nome"] = dados["nome"]
-            item["valor"] = dados["valor"]
-            item["marca"] = dados["marca"]
-            return "Sucesso"
-    return None
+    
+    item.nome = dados["nome"]
+    item.marca = dados["marca"]
+    item.valor = dados["valor"]
+    item.status = dados["status"]
+
+    db.session.commit()
+
+    return {
+        "Mensagem": "Item atualizado com Sucesso",
+        "Cliente": {
+            "SKU": item.SKU,
+            "nome": item.nome,
+            "marca": item.marca,
+            "status": item.status,
+            "valor": item.valor
+        }
+    }
 
 def deletar_item(sku_item):
     """Deleta item registrado"""

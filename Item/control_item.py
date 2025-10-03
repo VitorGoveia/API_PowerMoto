@@ -12,8 +12,10 @@ def get_itens():
 def get_itens_by_SKU(SKU_item):
     """Retorna o item com a SKU no endpoint, caso ele exista"""
     resposta = model_item.listar_item_por_id(SKU_item)
-    if "Erro" in resposta:
+    if "encontrado" in resposta:
         return jsonify({"Erro": "Item não encontrado"}),404
+    if "inativo" in resposta:
+        return jsonify({"Erro": "Item inativo"}),404
     return jsonify(resposta), 200
 
 @item_blueprint.route('/itens', methods=['POST'])
@@ -33,15 +35,19 @@ def post_item():
 @item_blueprint.route('/itens/<string:SKU_item>', methods=['PUT'])
 def put_item(SKU_item):
     """Alterar informações do item"""
-    novo_item = request.json
-    
-    resposta = model_item.alterar_item(SKU_item, novo_item)
-    if resposta == "Sucesso":
-        return jsonify({"Mensagem": "Alterações feitas com sucesso"}), 200
-    elif not resposta:
-        return jsonify({"Erro": "SKU do item, não encontrado"}), 404
-    else:
-        return jsonify(resposta), 400 
+    try:
+        novo_item = request.json
+        
+        resposta = model_item.alterar_item(SKU_item, novo_item)
+        if "Mensagem" in resposta:
+            return jsonify(resposta)
+        elif not resposta:
+            return jsonify({"Erro": "SKU do item, não encontrado"}), 404
+        else:
+            return jsonify(resposta), 400 
+    except Exception as e:
+        print("Erro no endpoint /clientes:", str(e))
+        return jsonify({"Erro": str(e)}), 500
 
 @item_blueprint.route('/itens/<string:SKU_item>', methods=['DELETE'])
 def delete_item(SKU_item):
