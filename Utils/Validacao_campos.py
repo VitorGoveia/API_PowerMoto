@@ -1,6 +1,3 @@
-from flask import jsonify
-
-
 def verificar_campos(campos_obrigatorios, novo_obj):
     """ Verifica a presença dos campos obrigatórios """
     campos_faltantes = []

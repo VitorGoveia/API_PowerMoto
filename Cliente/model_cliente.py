@@ -6,32 +6,30 @@ class Cliente(db.Model):
 
     id_cliente = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100), nullable=False)
-    telefone = db.Column(db.String(20), nullable=True)
-    
-    pedidos = db.relationship("Pedido", backref="cliente", lazy=True)
+    telefone = db.Column(db.String(20), unique=True)
+    status = db.Column(db.Boolean, default=True)
+
+    pedidos = db.relationship("Pedido", back_populates="cliente", lazy=True)
 
     def __repr__(self):
         return f'Cliente: {self.nome}'
 
-dici_cliente = {
-    "Clientes": [{"telefone": "11972529448", "nome": "Vitor"}]
-}
-
 #CLIENTES:
 def listar_clientes():
     """Retorna todos os clientes cadastrados"""
-    clientes = Cliente.query.all()
+    clientes = Cliente.query.filter_by(status=True).all()
     return [{
         "id": cliente.id_cliente,
         "telefone": cliente.telefone,
-        "nome": cliente.nome
+        "nome": cliente.nome,
+        "status": cliente.status
         }
         for cliente in clientes
     ]
 
-def listar_clientes_por_telefone(telefone):
+def listar_clientes_por_telefone(telefone_busca):
     """Retorna o item com o telefone no endpoint, caso ele exista"""
-    cliente = Cliente.query.get(telefone)
+    cliente = Cliente.query.filter_by(telefone=telefone_busca, status=True).first()
 
     if cliente is None:
         return {"Erro": "Cliente não encontrado"}
@@ -39,7 +37,8 @@ def listar_clientes_por_telefone(telefone):
     return {
         "id": cliente.id_cliente,
         "telefone": cliente.telefone,
-        "nome": cliente.nome
+        "nome": cliente.nome,
+        "status": cliente.status
     }
 
 def adicionar_cliente(dados):
@@ -68,28 +67,46 @@ def adicionar_cliente(dados):
         }
     }
 
-def alterar_cliente(numero_cliente, dados):
+def alterar_cliente(id, dados):
     """Alterar informaçôes dos clientes"""
-    clientes = dici_cliente["Clientes"]
+    cliente = Cliente.query.filter_by(id_cliente=id).first()
     
-    campos_obrigatorios = ["nome"]
+    if cliente is None:
+        return None
+
+    campos_obrigatorios = ["nome", "telefone"]
 
     resposta = verificar_campos(campos_obrigatorios, dados)
     if resposta:
         return resposta
     
-    for cliente in clientes:
-        if cliente["telefone"] == numero_cliente:
-            cliente["nome"] = dados["nome"]
-            return "Sucesso"
-    return None
+    cliente.nome = dados["nome"]
+    cliente.telefone = dados["telefone"]  
+    cliente.status = dados["status"]   
 
-def deletar_clientes(numero_cliente):
+    db.session.commit()
+
+    return {
+        "Mensagem": "Cliente atualizado com Sucesso",
+        "Cliente": {
+            "id": cliente.id_cliente,
+            "telefone": cliente.telefone,
+            "nome": cliente.nome,
+            "status": cliente.status
+        }
+    }
+
+def deletar_clientes(id):
     """Deleta cliente registrado"""
-    clientes = dici_cliente["Clientes"]
+    cliente = Cliente.query.filter_by(id_cliente=id).first()
+
+    if cliente is None:
+        return None
+
+    cliente.status = False
+    cliente.telefone = None
+        
+    db.session.commit()
     
-    for cliente in clientes:
-        if cliente["telefone"] == numero_cliente:
-            clientes.remove(cliente)
-            return {"Mensagem": f"Cliente com Telefone: {numero_cliente} deletado"}
-    return None
+    return {"Mensagem": f"Cliente inativado"}
+    

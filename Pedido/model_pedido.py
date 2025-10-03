@@ -1,7 +1,7 @@
 from Utils.Validacao_campos import verificar_campos
 from config import db
 from datetime import datetime
-from Cliente.model_cliente import dici_cliente, Cliente
+from Cliente.model_cliente import Cliente
 
 class Pedido(db.Model):
     __tablename__ = "pedido"
@@ -10,9 +10,8 @@ class Pedido(db.Model):
     data = db.Column(db.Date, default=datetime.today, nullable=True)
     id_cliente = db.Column(db.Integer, db.ForeignKey("cliente.id_cliente"), nullable=False)
 
-    # Relacionamento com Cliente
-    cliente_rel = db.relationship("Cliente", backref="pedidos_cliente")
-
+    cliente = db.relationship("Cliente", back_populates="pedidos")
+    
     def __repr__(self):
         return f"Pedido: {self.id_pedido}, Cliente: {self.id_cliente}, Data: {self.data}"
     

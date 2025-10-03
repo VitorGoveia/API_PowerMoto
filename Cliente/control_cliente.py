@@ -27,23 +27,23 @@ def post_cliente():
 
     return jsonify(resposta),201
 
-@cliente_blueprint.route('/clientes/<string:numero_cliente>', methods=['PUT'])
-def put_clientes(numero_cliente):
+@cliente_blueprint.route('/clientes/<int:id>', methods=['PUT'])
+def put_clientes(id):
     """Alterar informaçôes dos clientes"""
     novo_cliente = request.json
 
-    resposta = model_cliente.alterar_cliente(numero_cliente, novo_cliente)
-    if resposta == "Sucesso":
-        return jsonify({"Mensagem": "Alterações feitas com sucesso"}), 200
-    elif not resposta:
+    resposta = model_cliente.alterar_cliente(id, novo_cliente)
+    if not resposta:
         return jsonify({"Erro": "Cliente não encontrado"}), 404
+    elif "Mensagem" in resposta:
+        return jsonify(resposta)
     else:
         return jsonify(resposta), 400
 
-@cliente_blueprint.route('/clientes/<string:numero_cliente>', methods=['DELETE'])
-def delete_clientes(numero_cliente):
+@cliente_blueprint.route('/clientes/<int:id>', methods=['DELETE'])
+def delete_clientes(id):
     """Deleta cliente registrado"""
-    resposta = model_cliente.deletar_clientes(numero_cliente)
+    resposta = model_cliente.deletar_clientes(id)
     if resposta:
         return jsonify(resposta), 200
     return jsonify({"Erro": 'Cliente não encontrado'}), 404
