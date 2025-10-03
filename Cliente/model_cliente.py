@@ -27,9 +27,9 @@ def listar_clientes():
         for cliente in clientes
     ]
 
-def listar_clientes_por_telefone(telefone_busca):
+def listar_clientes_por_id(id_busca):
     """Retorna o item com o telefone no endpoint, caso ele exista"""
-    cliente = Cliente.query.filter_by(telefone=telefone_busca, status=True).first()
+    cliente = Cliente.query.filter_by(id_cliente=id_busca, status=True).first()
 
     if cliente is None:
         return {"Erro": "Cliente não encontrado"}
@@ -74,7 +74,7 @@ def alterar_cliente(id, dados):
     if cliente is None:
         return None
 
-    campos_obrigatorios = ["nome", "telefone"]
+    campos_obrigatorios = ["nome", "telefone", "status"]
 
     resposta = verificar_campos(campos_obrigatorios, dados)
     if resposta:
@@ -108,5 +108,5 @@ def deletar_clientes(id):
         
     db.session.commit()
     
-    return {"Mensagem": f"Cliente inativado"}
+    return {"Mensagem": f"Cliente {cliente.nome} inativado"}
     

@@ -19,12 +19,16 @@ def get_itens_by_SKU(SKU_item):
 @item_blueprint.route('/itens', methods=['POST'])
 def post_item():
     """Cadastra um item"""
-    novo_item = request.json
-    resposta = model_item.adicionar_item(novo_item)
-    if "Erro" in resposta:
-        return jsonify(resposta), 400
-        
-    return jsonify(resposta),201
+    try:
+        novo_item = request.json
+        resposta = model_item.adicionar_item(novo_item)
+        if "Erro" in resposta:
+            return jsonify(resposta), 400
+            
+        return jsonify(resposta),201
+    except Exception as e:
+        print("Erro no endpoint /clientes:", str(e))
+        return jsonify({"Erro": str(e)}), 500
 
 @item_blueprint.route('/itens/<string:SKU_item>', methods=['PUT'])
 def put_item(SKU_item):

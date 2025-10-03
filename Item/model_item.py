@@ -8,6 +8,7 @@ class Item(db.Model):
     nome = db.Column(db.String(100), nullable= False)
     marca = db.Column(db.String(75), nullable= False)
     valor = db.Column(db.Float, nullable= False)
+    status = db.Column(db.Boolean, default=True)
 
     def __repr__(self):
         return f'Item com SKU: {self.SKU}'
@@ -66,7 +67,8 @@ def adicionar_item(dados):
             "SKU": novo_item.SKU,
             "nome": novo_item.nome,
             "marca":novo_item.marca,
-            "valor":novo_item.valor
+            "valor":novo_item.valor,
+            "status": novo_item.status
         }
     }
 
@@ -90,10 +92,13 @@ def alterar_item(SKU_item, dados):
 
 def deletar_item(sku_item):
     """Deleta item registrado"""
-    itens = dici_itens["Itens"]
+    item = Item.query.get(sku_item)
 
-    for item in itens:
-        if item["SKU"] == sku_item:
-            itens.remove(item)
-            return {"Mensagem": f"Item com SKU: {sku_item} deletado"}
-    return None
+    if item is None:
+        return None
+    
+    item.status = False
+
+    db.session.commit()
+
+    return {"Mensagem": f"Item {item.SKU} inativado"}
