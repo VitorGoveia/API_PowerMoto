@@ -4,7 +4,7 @@ from Pedido import model_pedido
 pedido_blueprint = Blueprint("Pedido", __name__)
 
 @pedido_blueprint.route('/pedidos', methods=['GET'])
-def get_pedidos():
+def get_pedidos():  
     """Retorna todos os pedidos cadastrados"""
     return jsonify(model_pedido.listar_pedidos()), 200
 
@@ -39,8 +39,8 @@ def put_pedido(id_pedido):
 
     resposta = model_pedido.alterar_pedido(id_pedido, novo_pedido)
     
-    if resposta == "Sucesso":
-        return jsonify("Alteração feita com sucesso"), 200
+    if "Mensagem" in resposta:
+        return jsonify(resposta), 200
     elif resposta == "Cliente_Não_encontrado":
         return jsonify({"erro": "Telefone do cliente não encontrado nos clientes"}), 404
     elif resposta == "Item_Pedido_Não_encontrado":

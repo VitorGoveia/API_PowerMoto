@@ -36,8 +36,8 @@ def put_item_pedido(id_item_pedido):
     novo_item_pedido = request.json
 
     resposta = model_itemPedido.alterar_item_pedido(id_item_pedido, novo_item_pedido)
-    if resposta == "Sucesso":
-        return jsonify({"mensagem": "Item do Pedido atualizado com sucesso"}), 200
+    if "Mensagem" in resposta:
+        return jsonify(resposta), 200
     elif resposta == "Não_encontrado":
         return jsonify({"erro": "Item do Pedido com esse ID não foi encontrado"}), 404
     elif not resposta:
