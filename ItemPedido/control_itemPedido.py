@@ -7,7 +7,7 @@ item_pedido_blueprint = Blueprint("Item_Pedido", __name__)
 @item_pedido_blueprint.route('/itensPedido', methods=['GET'])
 def get_itens_pedido():
     """Retorna todos os itens de pedido cadastrados"""
-    return jsonify(model_itemPedido.listar_itens_pedido()), 200
+    return resposta_padrao(True, "Lista de Itens Pedido retornada com sucesso", model_itemPedido.listar_itens_pedido())
 
 @item_pedido_blueprint.route('/itensPedido/<int:id_item_pedido>', methods=['GET'])
 def get_itens_pedido_by_id(id_item_pedido):

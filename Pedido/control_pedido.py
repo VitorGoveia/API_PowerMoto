@@ -1,59 +1,76 @@
 from flask import Blueprint, request, jsonify
 from Pedido import model_pedido
+from Utils.helpers import resposta_padrao
 
 pedido_blueprint = Blueprint("Pedido", __name__)
 
 @pedido_blueprint.route('/pedidos', methods=['GET'])
 def get_pedidos():  
     """Retorna todos os pedidos cadastrados"""
-    return jsonify(model_pedido.listar_pedidos()), 200
+    return resposta_padrao(True, "Lista de pedidos retornada com sucesso", model_pedido.listar_pedidos())
 
 @pedido_blueprint.route('/pedidos/<int:id_pedido>', methods=['GET'])
 def get_pedido_by_id(id_pedido):
     """Retorna o pedido com o id no endpoint, caso ele exista"""
-    resposta = model_pedido.listar_pedido_por_id(id_pedido)
-    if "Erro" in resposta:
-        return jsonify({"Erro": "Pedido não encontrado"}), 404
-    return jsonify(resposta), 200
+    try:
+        resposta = model_pedido.listar_pedido_por_id(id_pedido)
+        if "Item do pedido inativo" in resposta:
+            return resposta_padrao(False, "Pedido inativo", status_code=400)
+        if "Pedido não encontrado" in resposta:
+            return resposta_padrao(False, "Pedido não encontrado", status_code=400)
+        return resposta_padrao(True, "Pedido retornado com sucesso", resposta)
+    except Exception as e:
+        return jsonify({"Mensagem": "Erro no endpoint /clientes:","Erro": str(e)}), 500
 
 @pedido_blueprint.route('/pedidos', methods=['POST'])
 def post_pedido():
     """Cadastrar pedido"""
-    dados = request.json
-    resposta = model_pedido.adicionar_pedido(dados)
+    try:
+        dados = request.json
+        resposta = model_pedido.adicionar_pedido(dados)
 
-    if "Erro" in resposta:
-        if "Cliente" in resposta:
-            return jsonify({"Erro": "Cliente não encontrado"}), 404
-        elif "item" in resposta:
-            return jsonify({"Erro": "Item não encontrado"}), 404
-        else:
-            return jsonify(resposta), 400
+        if "Erro" in resposta:
+            if "Cliente não encontrado" in resposta:
+                return resposta_padrao(False, "Cliente não encontrado", status_code=404)
+            elif "item" in resposta:
+                return resposta_padrao(False, "SKU do item não encontrado", status_code=404)
+            else:
+                return resposta_padrao(False, "Dados Faltantes", resposta, status_code=400)
 
-    return jsonify({"mensagem": "Pedido cadastrado com sucesso"}), 201
+        return resposta_padrao(True, "Item Pedido cadastrado com sucesso", resposta, status_code=201)  
+    except Exception as e:
+        return jsonify({"Mensagem": "Erro no endpoint /itensPedido:","Erro": str(e)}), 500
     
 @pedido_blueprint.route('/pedidos/<int:id_pedido>', methods=['PUT'])
 def put_pedido(id_pedido):
     """Alterar dados do pedido"""
-    novo_pedido = request.json
+    try:
+        novo_pedido = request.json
 
-    resposta = model_pedido.alterar_pedido(id_pedido, novo_pedido)
-    
-    if "Mensagem" in resposta:
-        return jsonify(resposta), 200
-    elif resposta == "Cliente_Não_encontrado":
-        return jsonify({"erro": "Telefone do cliente não encontrado nos clientes"}), 404
-    elif resposta == "Item_Pedido_Não_encontrado":
-        return jsonify({"erro": "Item do pedido não encontrado nos Itens do pedido"}), 404
-    elif not resposta:
-        return jsonify({"Erro": "Pedido não encontrado"}), 200
-    else:
-        return resposta, 400
+        resposta = model_pedido.alterar_pedido(id_pedido, novo_pedido)
+
+        if "Erro" in resposta:
+            if "Pedido não encontrado" in resposta:
+                return jsonify({"erro": "Pedido não encontrado"}), 404
+            elif "Cliente não encontrado" in resposta:
+                return resposta_padrao(False, "Cliente não encontrado", status_code=404)
+            elif "lista" in resposta:    
+                return resposta_padrao(False, "Campo 'id_itens_pedido' deve ser uma lista", status_code=404)
+            elif "ItemPedido com ID":
+                return resposta_padrao(False, dados=resposta, status_code=404)
+            return resposta_padrao(False, "Dados Faltantes", resposta, status_code=400)
+        return resposta_padrao(True, "Pedido atualizado com sucesso", resposta, status_code=201)
+    except Exception as e:
+        print("Erro no endpoint /itensPedido:", str(e))
+        return jsonify({"Erro": str(e)}), 500
                 
 @pedido_blueprint.route('/pedidos/<int:id_pedido>', methods=['DELETE'])
 def delete_pedido(id_pedido):
-    resposta = model_pedido.deletar_pedido(id_pedido)
-    
-    if resposta:
-        return jsonify(resposta), 200
-    return jsonify({"Erro": "Pedido não encontrado"}), 404
+    try:
+        resposta = model_pedido.deletar_pedido(id_pedido)
+        if resposta:
+            return resposta_padrao(True, "Pedido inativado com sucesso", resposta, status_code=200)
+        return resposta_padrao(False, "Pedido não encontrado", status_code=404)
+    except Exception as e:
+        print("Erro no endpoint /itensPedido:", str(e))
+        return jsonify({"Erro": str(e)}), 500

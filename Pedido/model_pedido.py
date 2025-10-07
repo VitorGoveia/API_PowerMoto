@@ -35,6 +35,9 @@ def listar_pedidos():
 def listar_pedido_por_id(id_pedido):
     """Retorna o pedido com o id no endpoint, caso ele exista"""
     pedido = Pedido.query.get(id_pedido)
+
+    if pedido.status == False:
+        return {"Erro": "Pedido inativo"}
     
     if pedido is None:
         return {"Erro": "Pedido não encontrado"}
@@ -56,28 +59,24 @@ def adicionar_pedido(dados):
     from Item.model_item import Item
     from ItemPedido.model_itemPedido import adicionar_item_pedido
 
-    # Campos obrigatórios
     campos_obrigatorios = ["telefone_cliente", "itens"]
     resposta = verificar_campos(campos_obrigatorios, dados)
     if resposta:
         return {"Erro": resposta}
 
-    # Verifica se o cliente existe
     cliente = Cliente.query.filter_by(telefone=dados["telefone_cliente"]).first()
     if not cliente:
         return {"Erro": "Cliente não encontrado"}
 
-    # Cria o pedido com data atual e cliente
     novo_pedido = Pedido(
         data=datetime.now().date(),
         id_cliente=cliente.id_cliente
     )
     db.session.add(novo_pedido)
-    db.session.commit()  # gera o id do pedido
+    db.session.commit() 
 
     itens_pedido = []
 
-    # Verifica e adiciona os itens
     for item_dados in dados["itens"]:
         item = Item.query.filter_by(SKU=item_dados["SKU_item"]).first()
         if not item:
@@ -92,17 +91,15 @@ def adicionar_pedido(dados):
 
         resposta_item = adicionar_item_pedido(item_para_adicionar)
 
-        # Caso haja erro ao adicionar um item, interrompe o processo
         if "Erro" in resposta_item:
             db.session.rollback()
             return resposta_item
         itens_pedido.append(resposta_item["Item_Pedido"])
         
-    db.session.commit()  # salva todos os itens
+    db.session.commit() 
 
     data_formatada = novo_pedido.data.strftime("%d/%m/%y")
 
-    # Retorna dados do pedido com lista de itens
     return {
         "Mensagem": "Pedido cadastrado com sucesso",
         "id_pedido": novo_pedido.id_pedido,
@@ -118,27 +115,22 @@ def alterar_pedido(id_pedido, dados):
     from ItemPedido.model_itemPedido import ItemPedido
 
     try:
-        # Busca pedido existente
         pedido = Pedido.query.get(id_pedido)
         if not pedido:
             return {"Erro": "Pedido não encontrado"}
 
-        # Validação de campos
         campos_obrigatorios = ["telefone_cliente", "id_itens_pedido"]
         resposta = verificar_campos(campos_obrigatorios, dados)
         if resposta:
             return {"Erro": resposta}
 
-        # Busca cliente pelo telefone
         cliente = Cliente.query.filter_by(telefone=dados["telefone_cliente"]).first()
         if not cliente:
             return {"Erro": "Cliente não encontrado"}
-
-        # Verifica se é lista
+        
         if not isinstance(dados["id_itens_pedido"], list):
             return {"Erro": "Campo 'id_itens_pedido' deve ser uma lista"}
 
-        # Lista de itens enviados
         itens_novos_ids = dados["id_itens_pedido"]
         itens_novos = []
 
@@ -148,16 +140,13 @@ def alterar_pedido(id_pedido, dados):
                 return {"Erro": f"ItemPedido com ID {id_item} não encontrado"}
             itens_novos.append(item)
 
-        # Remove itens antigos que não estão na nova lista
         for item_antigo in pedido.itens_pedido[:]:
             if item_antigo.id_ItemPedido not in itens_novos_ids:
                 db.session.delete(item_antigo)
 
-        # Associa os novos itens ao pedido
         for item in itens_novos:
             item.id_pedido = pedido.id_pedido
 
-        # Atualiza o cliente
         pedido.cliente = cliente
 
         db.session.commit()
