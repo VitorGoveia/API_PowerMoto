@@ -14,7 +14,6 @@ class Cliente(db.Model):
     def __repr__(self):
         return f'Cliente: {self.nome}'
 
-#CLIENTES:
 def listar_clientes():
     """Retorna todos os clientes cadastrados"""
     clientes = Cliente.query.filter_by(status=True).all()
@@ -87,7 +86,6 @@ def alterar_cliente(id, dados):
     db.session.commit()
 
     return {
-        "Mensagem": "Cliente atualizado com Sucesso",
         "Cliente": {
             "id": cliente.id_cliente,
             "telefone": cliente.telefone,
@@ -109,4 +107,3 @@ def deletar_clientes(id):
     db.session.commit()
     
     return {"Mensagem": f"Cliente {cliente.nome} inativado"}
-    

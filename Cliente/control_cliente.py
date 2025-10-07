@@ -1,12 +1,13 @@
 from flask import Blueprint, request, jsonify
 from Cliente import model_cliente
+from Utils.helpers import resposta_padrao
 
 cliente_blueprint = Blueprint("Cliente", __name__)
 
 @cliente_blueprint.route('/clientes', methods=['GET'])
 def get_clientes():
     """Retorna todos os clientes cadastrados"""
-    return jsonify(model_cliente.listar_clientes()), 200
+    return resposta_padrao(True, "Lista de clientes retornada com sucesso", model_cliente.listar_clientes())
 
 @cliente_blueprint.route('/clientes/<int:id_busca>', methods=['GET'])
 def get_clientes_by_id(id_busca):
@@ -14,22 +15,24 @@ def get_clientes_by_id(id_busca):
     try:
         resposta = model_cliente.listar_clientes_por_id(id_busca)
         if "Erro" in resposta:
-            return jsonify(resposta), 404
-        return jsonify(resposta), 200
+            return resposta_padrao(False, "Dados Faltantes", resposta, status_code=400)
+        return resposta_padrao(True, "Cliente retornado com sucesso", resposta)
     except Exception as e:
-        print("Erro no endpoint /clientes:", str(e))
-        return jsonify({"Erro": str(e)}), 500
+        return jsonify({"Mensagem": "Erro no endpoint /clientes:","Erro": str(e)}), 500
 
 @cliente_blueprint.route('/clientes', methods=['POST'])
 def post_cliente():
     """Cadastra um cliente"""
-    novo_cliente = request.json
+    try:
+        novo_cliente = request.json
+        
+        resposta = model_cliente.adicionar_cliente(novo_cliente)
+        if "Erro" in resposta:
+            return resposta_padrao(False, "Dados Faltantes", resposta, status_code=400)
+        return resposta_padrao(True, "Cliente cadastrado com sucesso", resposta, status_code=201)
     
-    resposta = model_cliente.adicionar_cliente(novo_cliente)
-    if "Erro" in resposta:
-        return jsonify(resposta),400
-
-    return jsonify(resposta),201
+    except Exception as e:
+        return jsonify({"Mensagem": "Erro no endpoint /clientes:","Erro": str(e)}), 500
 
 @cliente_blueprint.route('/clientes/<int:id>', methods=['PUT'])
 def put_clientes(id):
@@ -38,12 +41,13 @@ def put_clientes(id):
         novo_cliente = request.json
 
         resposta = model_cliente.alterar_cliente(id, novo_cliente)
+
         if not resposta:
-            return jsonify({"Erro": "Cliente não encontrado"}), 404
-        elif "Mensagem" in resposta:
-            return jsonify(resposta)
+            return resposta_padrao(False, "Cliente não encontrado", status_code=404)
+        elif "Cliente" in resposta:
+            return resposta_padrao(True, "Cliente atualizado com sucesso", resposta, status_code=200)
         else:
-            return jsonify(resposta), 400
+            return resposta_padrao(False, "Dados Faltantes", resposta, status_code=400)
     except Exception as e:
         print("Erro no endpoint /clientes:", str(e))
         return jsonify({"Erro": str(e)}), 500
@@ -51,8 +55,12 @@ def put_clientes(id):
 @cliente_blueprint.route('/clientes/<int:id>', methods=['DELETE'])
 def delete_clientes(id):
     """Deleta cliente registrado"""
-    resposta = model_cliente.deletar_clientes(id)
-    if resposta:
-        return jsonify(resposta), 200
-    return jsonify({"Erro": 'Cliente não encontrado'}), 404
+    try:
+        resposta = model_cliente.deletar_clientes(id)
+        if resposta:
+            return resposta_padrao(True, "Cliente inativado com sucesso", resposta, status_code=200)
+        return resposta_padrao(False, "Cliente não encontrado", status_code=404)
+    except Exception as e:
+        print("Erro no endpoint /clientes:", str(e))
+        return jsonify({"Erro": str(e)}), 500
     
