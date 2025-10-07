@@ -38,6 +38,9 @@ def listar_itens_pedido_por_id(id_item_pedido):
     """Retorna o item com o id do item do pedido no endpoint, caso ele exista"""
     item_pedido = ItemPedido.query.get(id_item_pedido)
     
+    if item_pedido.status == False:
+        return {"Erro": "Item do pedido inativo"}
+
     if item_pedido is None:
         return {"Erro": "Item do pedido não encontrado"}
 
@@ -102,7 +105,7 @@ def alterar_item_pedido(id_item_pedido, dados):
 
     resposta = verificar_campos(campos_obrigatorios, dados)
     if resposta:
-        return resposta
+        return {"Erro": resposta}
     
     sku_item = Item.query.filter_by(SKU=dados["SKU_item"]).first()
     if sku_item is None:

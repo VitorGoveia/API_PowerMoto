@@ -20,7 +20,7 @@ def get_itens_by_SKU(SKU_item):
             return resposta_padrao(False, "Item não encontrado", status_code=400)
         return resposta_padrao(True, "item retornado com sucesso", resposta)
     except Exception as e:
-            return jsonify({"Mensagem": "Erro no endpoint /clientes:","Erro": str(e)}), 500
+            return jsonify({"Mensagem": "Erro no endpoint /itens:","Erro": str(e)}), 500
 
 @item_blueprint.route('/itens', methods=['POST'])
 def post_item():
@@ -32,7 +32,7 @@ def post_item():
             return resposta_padrao(False, "Dados Faltantes", resposta, status_code=400)  
         return resposta_padrao(True, "Item cadastrado com sucesso", resposta, status_code=201)
     except Exception as e:
-        print("Erro no endpoint /clientes:", str(e))
+        print("Erro no endpoint /itens:", str(e))
         return jsonify({"Erro": str(e)}), 500
 
 @item_blueprint.route('/itens/<string:SKU_item>', methods=['PUT'])
@@ -49,7 +49,7 @@ def put_item(SKU_item):
         else:
             return resposta_padrao(False, "Dados Faltantes", resposta, status_code=400) 
     except Exception as e:
-        print("Erro no endpoint /clientes:", str(e))
+        print("Erro no endpoint /itens:", str(e))
         return jsonify({"Erro": str(e)}), 500
 
 @item_blueprint.route('/itens/<string:SKU_item>', methods=['DELETE'])
@@ -61,5 +61,5 @@ def delete_item(SKU_item):
             return resposta_padrao(True, "Item inativado com sucesso", resposta, status_code=200)
         return resposta_padrao(False, "Item não encontrado", status_code=404)
     except Exception as e:
-        print("Erro no endpoint /Item:", str(e))
+        print("Erro no endpoint /itens:", str(e))
         return jsonify({"Erro": str(e)}), 500
