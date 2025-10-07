@@ -30,6 +30,9 @@ def listar_clientes_por_id(id_busca):
     """Retorna o item com o telefone no endpoint, caso ele exista"""
     cliente = Cliente.query.filter_by(id_cliente=id_busca, status=True).first()
 
+    if cliente.status == False:
+        return {"Erro": "Cliente inativo"}
+
     if cliente is None:
         return {"Erro": "Cliente não encontrado"}
 

@@ -14,8 +14,10 @@ def get_clientes_by_id(id_busca):
     """Retorna o item com o telefone no endpoint, caso ele exista"""
     try:
         resposta = model_cliente.listar_clientes_por_id(id_busca)
-        if "Erro" in resposta:
-            return resposta_padrao(False, "Dados Faltantes", resposta, status_code=400)
+        if "inativo" in resposta:
+            return resposta_padrao(False, "Cliente inativo", status_code=400)
+        if "não encontrado" in resposta:
+            return resposta_padrao(False, "Cliente não encontrado", status_code=400)
         return resposta_padrao(True, "Cliente retornado com sucesso", resposta)
     except Exception as e:
         return jsonify({"Mensagem": "Erro no endpoint /clientes:","Erro": str(e)}), 500

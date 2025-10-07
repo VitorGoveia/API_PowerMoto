@@ -89,8 +89,7 @@ def alterar_item(sku_item, dados):
     db.session.commit()
 
     return {
-        "Mensagem": "Item atualizado com Sucesso",
-        "Cliente": {
+        "Item": {
             "SKU": item.SKU,
             "nome": item.nome,
             "marca": item.marca,
