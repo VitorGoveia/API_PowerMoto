@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify 
-from ItemPedido import model_itemPedido
+from ItemPedido.model_itemPedido import ItemPedidoModel
 from Utils.helpers import resposta_padrao
 
 item_pedido_blueprint = Blueprint("Item_Pedido", __name__)
@@ -7,13 +7,13 @@ item_pedido_blueprint = Blueprint("Item_Pedido", __name__)
 @item_pedido_blueprint.route('/itensPedido', methods=['GET'])
 def get_itens_pedido():
     """Retorna todos os itens de pedido cadastrados"""
-    return resposta_padrao(True, "Lista de Itens Pedido retornada com sucesso", model_itemPedido.listar_itens_pedido())
+    return resposta_padrao(True, "Lista de Itens Pedido retornada com sucesso", ItemPedidoModel.listar_itens_pedido())
 
 @item_pedido_blueprint.route('/itensPedido/<int:id_item_pedido>', methods=['GET'])
 def get_itens_pedido_by_id(id_item_pedido):
     """Retorna o item com o id do item do pedido no endpoint, caso ele exista"""
     try:
-        resposta = model_itemPedido.listar_itens_pedido_por_id(id_item_pedido)
+        resposta = ItemPedidoModel.listar_itens_pedido_por_id(id_item_pedido)
         if "inativo" in resposta:
             return resposta_padrao(False, "Item do pedido inativo", status_code=400)
         if "não encontrado" in resposta:
@@ -28,7 +28,7 @@ def post_item_pedido():
     try:
         novo_item_pedido = request.json
 
-        resposta = model_itemPedido.adicionar_item_pedido(novo_item_pedido)
+        resposta = ItemPedidoModel.adicionar_item_pedido(novo_item_pedido)
         if "Erro" in resposta:
             if "Item não encontrado" in resposta:
                 return resposta_padrao(False, "SKU do item não encontrado", status_code=404)
@@ -46,7 +46,7 @@ def put_item_pedido(id_item_pedido):
     try:
         novo_item_pedido = request.json
 
-        resposta = model_itemPedido.alterar_item_pedido(id_item_pedido, novo_item_pedido)
+        resposta = ItemPedidoModel.alterar_item_pedido(id_item_pedido, novo_item_pedido)
 
         if "Erro" in resposta:
             if "Item não encontrado" in resposta:
@@ -63,9 +63,9 @@ def put_item_pedido(id_item_pedido):
 def delete_item_pedido(id_item_pedido):
     """Deleta item do pedido cadastrado"""
     try:
-        resposta = model_itemPedido.deletar_item_pedido(id_item_pedido)
+        resposta = ItemPedidoModel.deletar_item_pedido(id_item_pedido)
         if resposta:
-            return resposta_padrao(True, "Item do Pedido inativado com sucesso", resposta, status_code=200)
+            return resposta_padrao(True, f"Item do Pedido {resposta} inativado com sucesso", status_code=200)
         return resposta_padrao(False, "Item do Pedido não encontrado", status_code=404)
     except Exception as e:
         print("Erro no endpoint /itensPedido:", str(e))

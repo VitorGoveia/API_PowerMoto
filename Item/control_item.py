@@ -58,7 +58,7 @@ def delete_item(SKU_item):
     try:
         resposta = ItemModel.deletar_clientes(id)
         if resposta:
-            return resposta_padrao(True, "Item inativado com sucesso", resposta, status_code=200)
+            return resposta_padrao(True, f"Item {resposta} inativado com sucesso", status_code=200)
         return resposta_padrao(False, "Item não encontrado", status_code=404)
     except Exception as e:
         print("Erro no endpoint /itens:", str(e))
