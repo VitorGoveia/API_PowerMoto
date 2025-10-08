@@ -12,101 +12,87 @@ class Item(db.Model):
 
     def __repr__(self):
         return f'Item com SKU: {self.SKU}'
-
-def listar_itens():
-    """Retorna todos os itens cadastrados"""
-    itens = Item.query.filter_by(status=True).all()
-    return [{
-            "SKU": item.SKU,
-            "nome":item.nome,
-            "marca":item.marca,
-            "valor":item.valor
+    
+    def to_dict(self):
+        return {
+            "SKU": self.SKU,
+            "nome": self.nome,
+            "marca": self.marca,
+            "valor": self.valor,
+            "status": self.status
         }
-        for item in itens
-    ]
 
-def listar_item_por_id(SKU_item):
-    """Retorna o item com a SKU no endpoint, caso ele exista"""
-    item = Item.query.get(SKU_item)
-    
-    if item.status == False:
-        return {"Erro": "Item inativo"}
+class ItemModel():
+    @staticmethod
+    def listar_itens():
+        """Retorna todos os itens cadastrados"""
+        itens = Item.query.filter_by(status=True).all()
+        return [item.to_dict() for item in itens]
 
-    if item is None:
-        return {"Erro": "Item não encontrado"}
+    @staticmethod
+    def listar_item_por_id(SKU_item):
+        """Retorna o item com a SKU no endpoint, caso ele exista"""
+        item = Item.query.get(SKU_item)
+        
+        if item.status == False:
+            return {"Erro": "Item inativo"}
 
-    return {
-        "SKU": item.SKU,
-        "nome": item.nome,
-        "marca": item.marca,
-        "valor": item.valor        
-    }
+        if item is None:
+            return {"Erro": "Item não encontrado"}
 
-def adicionar_item(dados):
-    """Cadastra um item"""  
-    campos_obrigatorios = ["SKU","nome", "valor", "marca"]
+        return item.to_dict()
 
-    resposta = verificar_campos(campos_obrigatorios, dados)
-    if resposta:
-        return {"Erro": resposta}
-    
-    novo_item = Item(
-            SKU = dados["SKU"],
-            nome = dados["nome"],
-            marca = dados["marca"],
-            valor = dados["valor"]
-        )
-    
-    db.session.add(novo_item)
-    db.session.commit()
+    @staticmethod
+    def adicionar_item(dados):
+        """Cadastra um item"""  
+        campos_obrigatorios = ["SKU","nome", "valor", "marca"]
 
-    return {
-        "Mensagem": "Item criado com sucesso!",
-        "Item": {
-            "SKU": novo_item.SKU,
-            "nome": novo_item.nome,
-            "marca":novo_item.marca,
-            "valor":novo_item.valor,
-            "status": novo_item.status
-        }
-    }
+        resposta = verificar_campos(campos_obrigatorios, dados)
+        if resposta:
+            return {"Erro": resposta}
+        
+        novo_item = Item(
+                SKU = dados["SKU"],
+                nome = dados["nome"],
+                marca = dados["marca"],
+                valor = dados["valor"]
+            )
+        
+        db.session.add(novo_item)
+        db.session.commit()
 
-def alterar_item(sku_item, dados):
-    """Alterar informações do item"""
-    item = Item.query.get(sku_item)
+        return novo_item.to_dict()
 
-    campos_obrigatorios = ["nome", "valor", "marca", "status"]
-    
-    resposta = verificar_campos(campos_obrigatorios, dados)
-    if resposta:
-        return resposta
-    
-    item.nome = dados["nome"]
-    item.marca = dados["marca"]
-    item.valor = dados["valor"]
-    item.status = dados["status"]
+    @staticmethod
+    def alterar_item(sku_item, dados):
+        """Alterar informações do item"""
+        item = Item.query.get(sku_item)
 
-    db.session.commit()
+        campos_obrigatorios = ["nome", "valor", "marca", "status"]
+        
+        resposta = verificar_campos(campos_obrigatorios, dados)
+        if resposta:
+            return resposta
+        
+        item.nome = dados["nome"]
+        item.marca = dados["marca"]
+        item.valor = dados["valor"]
+        item.status = dados["status"]
 
-    return {
-        "Item": {
-            "SKU": item.SKU,
-            "nome": item.nome,
-            "marca": item.marca,
-            "status": item.status,
-            "valor": item.valor
-        }
-    }
+        db.session.commit()
 
-def deletar_item(sku_item):
-    """Deleta item registrado"""
-    item = Item.query.get(sku_item)
+        return item.to_dict()
 
-    if item is None:
-        return None
-    
-    item.status = False
+    @staticmethod
+    def deletar_item(sku_item):
+        """Deleta item registrado"""
+        item = Item.query.get(sku_item)
 
-    db.session.commit()
+        if item is None:
+            return None
+        
+        item.status = False
 
-    return {"Mensagem": f"Item {item.SKU} inativado"}
+        db.session.commit()
+
+        return item.SKU

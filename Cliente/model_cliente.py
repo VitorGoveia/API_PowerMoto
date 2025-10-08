@@ -22,7 +22,7 @@ class Cliente(db.Model):
             "status": self.status
         }
 
-class Cliente_Model():
+class ClienteModel():
     @staticmethod
     def listar_clientes():
         """Retorna todos os clientes cadastrados"""
