@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from Pedido import model_pedido
+from Pedido.model_pedido import PedidoModel
 from Utils.helpers import resposta_padrao
 
 pedido_blueprint = Blueprint("Pedido", __name__)
@@ -7,13 +7,13 @@ pedido_blueprint = Blueprint("Pedido", __name__)
 @pedido_blueprint.route('/pedidos', methods=['GET'])
 def get_pedidos():  
     """Retorna todos os pedidos cadastrados"""
-    return resposta_padrao(True, "Lista de pedidos retornada com sucesso", model_pedido.listar_pedidos())
+    return resposta_padrao(True, "Lista de pedidos retornada com sucesso", PedidoModel.listar_pedidos())
 
 @pedido_blueprint.route('/pedidos/<int:id_pedido>', methods=['GET'])
 def get_pedido_by_id(id_pedido):
     """Retorna o pedido com o id no endpoint, caso ele exista"""
     try:
-        resposta = model_pedido.listar_pedido_por_id(id_pedido)
+        resposta = PedidoModel.listar_pedido_por_id(id_pedido)
         if "Item do pedido inativo" in resposta:
             return resposta_padrao(False, "Pedido inativo", status_code=400)
         if "Pedido não encontrado" in resposta:
@@ -27,7 +27,7 @@ def post_pedido():
     """Cadastrar pedido"""
     try:
         dados = request.json
-        resposta = model_pedido.adicionar_pedido(dados)
+        resposta = PedidoModel.adicionar_pedido(dados)
 
         if "Erro" in resposta:
             if "Cliente não encontrado" in resposta:
@@ -47,7 +47,7 @@ def put_pedido(id_pedido):
     try:
         novo_pedido = request.json
 
-        resposta = model_pedido.alterar_pedido(id_pedido, novo_pedido)
+        resposta = PedidoModel.alterar_pedido(id_pedido, novo_pedido)
 
         if "Erro" in resposta:
             if "Pedido não encontrado" in resposta:
@@ -67,9 +67,9 @@ def put_pedido(id_pedido):
 @pedido_blueprint.route('/pedidos/<int:id_pedido>', methods=['DELETE'])
 def delete_pedido(id_pedido):
     try:
-        resposta = model_pedido.deletar_pedido(id_pedido)
+        resposta = PedidoModel.deletar_pedido(id_pedido)
         if resposta:
-            return resposta_padrao(True, "Pedido inativado com sucesso", resposta, status_code=200)
+            return resposta_padrao(True, f"Pedido {resposta} inativado com sucesso", status_code=200)
         return resposta_padrao(False, "Pedido não encontrado", status_code=404)
     except Exception as e:
         print("Erro no endpoint /itensPedido:", str(e))
