@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from Cliente import model_cliente
+from Cliente.model_cliente import Cliente_Model
 from Utils.helpers import resposta_padrao
 
 cliente_blueprint = Blueprint("Cliente", __name__)
@@ -7,13 +7,13 @@ cliente_blueprint = Blueprint("Cliente", __name__)
 @cliente_blueprint.route('/clientes', methods=['GET'])
 def get_clientes():
     """Retorna todos os clientes cadastrados"""
-    return resposta_padrao(True, "Lista de clientes retornada com sucesso", model_cliente.listar_clientes())
+    return resposta_padrao(True, "Lista de clientes retornada com sucesso", Cliente_Model.listar_clientes())
 
 @cliente_blueprint.route('/clientes/<int:id_busca>', methods=['GET'])
 def get_clientes_by_id(id_busca):
     """Retorna o item com o telefone no endpoint, caso ele exista"""
     try:
-        resposta = model_cliente.listar_clientes_por_id(id_busca)
+        resposta = Cliente_Model.listar_clientes_por_id(id_busca)
         if "inativo" in resposta:
             return resposta_padrao(False, "Cliente inativo", status_code=400)
         if "não encontrado" in resposta:
@@ -28,7 +28,7 @@ def post_cliente():
     try:
         novo_cliente = request.json
         
-        resposta = model_cliente.adicionar_cliente(novo_cliente)
+        resposta = Cliente_Model.adicionar_cliente(novo_cliente)
         if "Erro" in resposta:
             return resposta_padrao(False, "Dados Faltantes", resposta, status_code=400)
         return resposta_padrao(True, "Cliente cadastrado com sucesso", resposta, status_code=201)
@@ -42,7 +42,7 @@ def put_clientes(id):
     try:
         novo_cliente = request.json
 
-        resposta = model_cliente.alterar_cliente(id, novo_cliente)
+        resposta = Cliente_Model.alterar_cliente(id, novo_cliente)
 
         if not resposta:
             return resposta_padrao(False, "Cliente não encontrado", status_code=404)
@@ -58,9 +58,9 @@ def put_clientes(id):
 def delete_clientes(id):
     """Deleta cliente registrado"""
     try:
-        resposta = model_cliente.deletar_clientes(id)
+        resposta = Cliente_Model.deletar_clientes(id)
         if resposta:
-            return resposta_padrao(True, "Cliente inativado com sucesso", resposta, status_code=200)
+            return resposta_padrao(True, f"Cliente {resposta} inativado com sucesso", status_code=200)
         return resposta_padrao(False, "Cliente não encontrado", status_code=404)
     except Exception as e:
         print("Erro no endpoint /clientes:", str(e))

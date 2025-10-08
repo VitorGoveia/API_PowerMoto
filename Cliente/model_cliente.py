@@ -14,99 +14,87 @@ class Cliente(db.Model):
     def __repr__(self):
         return f'Cliente: {self.nome}'
 
-def listar_clientes():
-    """Retorna todos os clientes cadastrados"""
-    clientes = Cliente.query.filter_by(status=True).all()
-    return [{
-        "id": cliente.id_cliente,
-        "telefone": cliente.telefone,
-        "nome": cliente.nome,
-        "status": cliente.status
+    def to_dict(self):
+        return {
+            "id": self.id_cliente,
+            "nome": self.nome,
+            "telefone": self.telefone,
+            "status": self.status
         }
-        for cliente in clientes
-    ]
 
-def listar_clientes_por_id(id_busca):
-    """Retorna o item com o telefone no endpoint, caso ele exista"""
-    cliente = Cliente.query.filter_by(id_cliente=id_busca, status=True).first()
+class Cliente_Model():
+    @staticmethod
+    def listar_clientes():
+        """Retorna todos os clientes cadastrados"""
+        clientes = Cliente.query.filter_by(status=True).all()
+        return [cliente.to_dict() for cliente in clientes]
 
-    if cliente.status == False:
-        return {"Erro": "Cliente inativo"}
+    @staticmethod
+    def listar_clientes_por_id(id_busca):
+        """Retorna o item com o telefone no endpoint, caso ele exista"""
+        cliente = Cliente.query.filter_by(id_cliente=id_busca, status=True).first()
 
-    if cliente is None:
-        return {"Erro": "Cliente não encontrado"}
+        if cliente.status == False:
+            return {"Erro": "Cliente inativo"}
 
-    return {
-        "id": cliente.id_cliente,
-        "telefone": cliente.telefone,
-        "nome": cliente.nome,
-        "status": cliente.status
-    }
+        if cliente is None:
+            return {"Erro": "Cliente não encontrado"}
 
-def adicionar_cliente(dados):
-    """Cadastra um cliente"""
-   
-    campos_obrigatorios = ["telefone", "nome"]
-
-    resposta = verificar_campos(campos_obrigatorios, dados)
-    if resposta:
-        return {"Erro": resposta}
-
-    novo_cliente = Cliente(
-        telefone = dados["telefone"],
-        nome = dados["nome"]
-    )
-
-    db.session.add(novo_cliente)
-    db.session.commit()
-
-    return {
-        "Mensagem": "Cliente cadastrado com Sucesso",
-        "Cliente": {
-            "id": novo_cliente.id_cliente,
-            "telefone": novo_cliente.telefone,
-            "nome": novo_cliente.nome
-        }
-    }
-
-def alterar_cliente(id, dados):
-    """Alterar informaçôes dos clientes"""
-    cliente = Cliente.query.filter_by(id_cliente=id).first()
+        return cliente.to_dict()
     
-    if cliente is None:
-        return None
-
-    campos_obrigatorios = ["nome", "telefone", "status"]
-
-    resposta = verificar_campos(campos_obrigatorios, dados)
-    if resposta:
-        return resposta
+    @staticmethod
+    def adicionar_cliente(dados):
+        """Cadastra um cliente"""
     
-    cliente.nome = dados["nome"]
-    cliente.telefone = dados["telefone"]  
-    cliente.status = dados["status"]   
+        campos_obrigatorios = ["telefone", "nome"]
 
-    db.session.commit()
+        resposta = verificar_campos(campos_obrigatorios, dados)
+        if resposta:
+            return {"Erro": resposta}
 
-    return {
-        "Cliente": {
-            "id": cliente.id_cliente,
-            "telefone": cliente.telefone,
-            "nome": cliente.nome,
-            "status": cliente.status
-        }
-    }
+        novo_cliente = Cliente(
+            telefone = dados["telefone"],
+            nome = dados["nome"]
+        )
 
-def deletar_clientes(id):
-    """Deleta cliente registrado"""
-    cliente = Cliente.query.filter_by(id_cliente=id).first()
+        db.session.add(novo_cliente)
+        db.session.commit()
 
-    if cliente is None:
-        return None
+        return novo_cliente.to_dict()
 
-    cliente.status = False
-    cliente.telefone = None
+    @staticmethod
+    def alterar_cliente(id, dados):
+        """Alterar informaçôes dos clientes"""
+        cliente = Cliente.query.filter_by(id_cliente=id).first()
         
-    db.session.commit()
-    
-    return {"Mensagem": f"Cliente {cliente.nome} inativado"}
+        if cliente is None:
+            return None
+
+        campos_obrigatorios = ["nome", "telefone", "status"]
+
+        resposta = verificar_campos(campos_obrigatorios, dados)
+        if resposta:
+            return resposta
+        
+        cliente.nome = dados["nome"]
+        cliente.telefone = dados["telefone"]  
+        cliente.status = dados["status"]   
+
+        db.session.commit()
+
+        return cliente.to_dict()
+
+    @staticmethod
+    def deletar_clientes(id):
+        """Deleta cliente registrado"""
+        cliente = Cliente.query.filter_by(id_cliente=id).first()
+
+        if cliente is None:
+            return None
+
+        cliente.status = False
+        cliente.telefone = None
+            
+        db.session.commit()
+        
+        return cliente.nome
