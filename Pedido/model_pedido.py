@@ -2,6 +2,7 @@ from Utils.Validacao_campos import verificar_campos
 from config import db
 from datetime import datetime
 from Cliente.model_cliente import Cliente
+from sqlalchemy.orm import joinedload
 
 class Pedido(db.Model):
     __tablename__ = "pedido"
@@ -9,6 +10,7 @@ class Pedido(db.Model):
     id_pedido = db.Column(db.Integer, primary_key=True)
     data = db.Column(db.Date, default=datetime.today, nullable=True)
     id_cliente = db.Column(db.Integer, db.ForeignKey("cliente.id_cliente"), nullable=False)
+    status = db.Column(db.Boolean, default=True)
 
     cliente = db.relationship("Cliente", back_populates="pedidos")
     
@@ -32,22 +34,40 @@ class PedidoModel():
 
     @staticmethod
     def listar_pedido_por_id(id_pedido):
-        """Retorna o pedido com o id no endpoint, caso ele exista"""
-        pedido = Pedido.query.get(id_pedido)
+        """Retorna um pedido pelo ID ou lista os pedidos de um cliente pelo telefone."""
 
-        if pedido.status == False:
-            return {"Erro": "Pedido inativo"}
-        
-        if pedido is None:
-            return {"Erro": "Pedido não encontrado"}
-        
-        return pedido.to_dict()
+        is_phone = len(str(id_pedido)) >= 11
+
+        if not is_phone:
+            pedido = Pedido.query.get(id_pedido)
+            if pedido is None:
+                return {"Erro": "Pedido não encontrado"}
+            if not pedido.status:
+                return {"Erro": "Pedido inativo"}
+            return pedido.to_dict()
+
+        # Se for telefone, busca cliente
+        cliente = Cliente.query.filter_by(telefone=str(id_pedido)).first()
+        if cliente is None:
+            return {"Erro": "Cliente não encontrado"}
+
+        # Carrega os pedidos junto com o cliente (evita None em self.cliente)
+        pedidos_do_cliente = (
+            Pedido.query.options(joinedload(Pedido.cliente))
+            .filter_by(id_cliente=cliente.id_cliente)
+            .all()
+        )
+
+        if not pedidos_do_cliente:
+            return {"Erro": "Nenhum pedido encontrado para este cliente"}
+
+        return [pedido.to_dict() for pedido in pedidos_do_cliente]
 
     @staticmethod
-    def adicionar_pedido(dados):
+    def adicionar_pedido(dados):    
         """Cadastrar pedido com cliente e itens do pedido"""
         from Item.model_item import Item
-        from ItemPedido.model_itemPedido import adicionar_item_pedido
+        from ItemPedido.model_itemPedido import ItemPedidoModel
 
         campos_obrigatorios = ["telefone_cliente", "itens"]
         resposta = verificar_campos(campos_obrigatorios, dados)
@@ -79,12 +99,12 @@ class PedidoModel():
                 "id_pedido": novo_pedido.id_pedido
             }
 
-            resposta_item = adicionar_item_pedido(item_para_adicionar)
+            resposta_item = ItemPedidoModel.adicionar_item_pedido(item_para_adicionar)
 
             if "Erro" in resposta_item:
                 db.session.rollback()
                 return resposta_item
-            itens_pedido.append(resposta_item["Item_Pedido"])
+            itens_pedido.append(resposta_item)
             
         db.session.commit() 
 

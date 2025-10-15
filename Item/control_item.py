@@ -42,7 +42,7 @@ def put_item(SKU_item):
         novo_item = request.json
         
         resposta = ItemModel.alterar_item(SKU_item, novo_item)
-        if "Item" in resposta:
+        if type(resposta) is dict:
             return resposta_padrao(True, "Item atualizado com sucesso", resposta, status_code=200)
         elif not resposta:
             return resposta_padrao(False, "Item não encontrado", status_code=404)
@@ -56,7 +56,7 @@ def put_item(SKU_item):
 def delete_item(SKU_item):
     """Deleta item registrado"""
     try:
-        resposta = ItemModel.deletar_clientes(id)
+        resposta = ItemModel.deletar_item(SKU_item)
         if resposta:
             return resposta_padrao(True, f"Item {resposta} inativado com sucesso", status_code=200)
         return resposta_padrao(False, "Item não encontrado", status_code=404)

@@ -2,12 +2,14 @@ from Item import control_item
 from Cliente import control_cliente
 from ItemPedido import control_itemPedido
 from Pedido import control_pedido
+from flask_cors import CORS
 
 from config import init_db
 from flask import Flask
 import os
 
 app = Flask(__name__)
+CORS(app)
 
 init_db(app)
 

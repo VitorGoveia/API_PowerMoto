@@ -14,10 +14,8 @@ def get_pedido_by_id(id_pedido):
     """Retorna o pedido com o id no endpoint, caso ele exista"""
     try:
         resposta = PedidoModel.listar_pedido_por_id(id_pedido)
-        if "Item do pedido inativo" in resposta:
-            return resposta_padrao(False, "Pedido inativo", status_code=400)
-        if "Pedido não encontrado" in resposta:
-            return resposta_padrao(False, "Pedido não encontrado", status_code=400)
+        if "Erro" in resposta:
+            return resposta_padrao(False, resposta["Erro"], status_code=400)
         return resposta_padrao(True, "Pedido retornado com sucesso", resposta)
     except Exception as e:
         return jsonify({"Mensagem": "Erro no endpoint /clientes:","Erro": str(e)}), 500

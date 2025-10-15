@@ -46,7 +46,7 @@ def put_clientes(id):
 
         if not resposta:
             return resposta_padrao(False, "Cliente não encontrado", status_code=404)
-        elif "Cliente" in resposta:
+        elif type(resposta) is dict:
             return resposta_padrao(True, "Cliente atualizado com sucesso", resposta, status_code=200)
         else:
             return resposta_padrao(False, "Dados Faltantes", resposta, status_code=400)
