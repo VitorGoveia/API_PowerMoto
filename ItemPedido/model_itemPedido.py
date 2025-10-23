@@ -1,5 +1,5 @@
 from Utils.Validacao_campos import verificar_campos
-from Item.model_item import Item
+from Item.model_item import Item, ItemModel
 from config import db
 
 class ItemPedido(db.Model):
@@ -12,7 +12,7 @@ class ItemPedido(db.Model):
     status = db.Column(db.Boolean, default=True)
 
     SKU_item = db.Column(db.String(100), db.ForeignKey("item.SKU"), nullable=False)
-    id_pedido = db.Column(db.Integer, db.ForeignKey("pedido.id_pedido"), nullable=False)
+    id_pedido = db.Column(db.Integer, db.ForeignKey("pedido.id_pedido"))
 
     item = db.relationship("Item", backref="itens_pedido")
     pedido = db.relationship("Pedido", backref="itens_pedido")
@@ -27,6 +27,7 @@ class ItemPedido(db.Model):
             "Quantidade": self.quantidade,
             "Prazo": self.prazo, 
             "Valor Item do Pedido": self.valor_item_pedido,
+            "Nome": self.item.nome,
             "Status": self.status
         }
 
@@ -123,6 +124,7 @@ class ItemPedidoModel():
             return None
         
         Item_pedido.status = False
+        Item_pedido.id_pedido = None
 
         db.session.commit()
 
