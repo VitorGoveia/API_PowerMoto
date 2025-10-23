@@ -1,0 +1,1 @@
+from .model_pedido import Pedido
